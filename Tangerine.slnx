@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Tangerine.Core/Tangerine.Core.csproj" />
+    <Project Path="src/Tangerine/Tangerine.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Tangerine.Core.Tests/Tangerine.Core.Tests.csproj" />
+  </Folder>
+</Solution>

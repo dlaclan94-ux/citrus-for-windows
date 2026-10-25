@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <!-- WPF 와 WinForms 를 같이 쓰면 Application, Point 같은 이름이 겹치므로 using 은 직접 적는다 -->
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <PlatformTarget>x64</PlatformTarget>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <!-- WinForms 는 알림 아이콘에만 쓴다. DPI 는 WPF 를 위해 매니페스트에서 정하므로 WinForms 권고(WFO0003)는 끈다 -->
+    <NoWarn>$(NoWarn);WFO0003</NoWarn>
+    <AssemblyName>Tangerine</AssemblyName>
+    <RootNamespace>Tangerine</RootNamespace>
+    <Product>Tangerine for Windows</Product>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Magick.NET-Q8-x64" Version="14.17.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Tangerine.Core\Tangerine.Core.csproj" />
+  </ItemGroup>
+
+  <!-- scripts/fetch-ffmpeg.ps1 로 받은 ffmpeg.exe 를 실행 파일 옆 tools\ 에 둔다 (단일 파일 안에는 넣지 않음) -->
+  <ItemGroup Condition="Exists('tools')">
+    <None Include="tools\**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+  </ItemGroup>
+
+</Project>
