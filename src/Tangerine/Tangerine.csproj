@@ -27,6 +27,11 @@
     <ProjectReference Include="..\Tangerine.Core\Tangerine.Core.csproj" />
   </ItemGroup>
 
+  <!-- 한글 자동화 보안 승인 모듈 (hancom\README.md). 한글(hwp.exe)이 직접 불러 쓰므로 실행 파일 옆에 둔다 -->
+  <ItemGroup>
+    <None Update="hancom\FilePathCheckerModuleExample.dll" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+  </ItemGroup>
+
   <!-- scripts/fetch-ffmpeg.ps1 로 받은 ffmpeg.exe 를 실행 파일 옆 tools\ 에 둔다 (단일 파일 안에는 넣지 않음) -->
   <ItemGroup Condition="Exists('tools')">
     <None Include="tools\**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />

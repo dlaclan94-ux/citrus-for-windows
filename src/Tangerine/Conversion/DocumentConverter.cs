@@ -72,6 +72,8 @@ internal static class DocumentConverter
         dynamic hwp = Create("HWPFrame.HwpObject", "한글");
         try
         {
+            if (RegisterHancomModule())
+                hwp.RegisterModule("FilePathCheckDLL", HancomModuleName);
             if (!(bool)hwp.Open(source, "", "forceopen:true;versionwarning:false;suspendpassword:true"))
                 throw new InvalidOperationException("한글이 문서를 열지 못했습니다 (암호가 걸렸거나 손상된 문서일 수 있음)");
             if (!(bool)hwp.SaveAs(output, "PDF", ""))
@@ -83,6 +85,22 @@ internal static class DocumentConverter
             hwp.Quit();
             Release(hwp);
         }
+    }
+
+    const string HancomModuleName = "TangerineFilePathChecker";
+
+    /// <summary>
+    /// 한글이 자동화로 파일을 열 때마다 띄우는 "접근 허용" 확인 창을 건너뛰도록 한컴 보안 승인 모듈의 위치를 적어 둔다.
+    /// 탠저린 폴더를 옮겨도 맞도록 매번 적는다. 모듈이 없으면 false (확인 창이 뜬다).
+    /// </summary>
+    static bool RegisterHancomModule()
+    {
+        var dll = Path.Combine(AppContext.BaseDirectory, "hancom", "FilePathCheckerModuleExample.dll");
+        if (!File.Exists(dll))
+            return false;
+        using var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"Software\HNC\HwpAutomation\Modules");
+        key.SetValue(HancomModuleName, dll);
+        return true;
     }
 
     /// <param name="text">null 이면 Word 문서를 연다. 아니면 새 문서에 이 글을 넣는다 (메모장 파일).</param>
