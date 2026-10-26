@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Tangerine.Services;
 
 namespace Tangerine.Conversion;
 
@@ -46,7 +47,13 @@ internal sealed class FfmpegRunner
         await stdout;
 
         if (process.ExitCode != 0)
-            throw new InvalidOperationException($"ffmpeg 오류 (코드 {process.ExitCode}): {LastLines(error, 3)}");
+        {
+            AppLog.Write($"ffmpeg 오류 (코드 {process.ExitCode}): {LastLines(error, 3)}");
+            // 소리 없는 영상에서 '소리만' 을 고른 경우처럼 원본에 필요한 트랙이 없을 때
+            throw new InvalidOperationException(error.Contains("does not contain any stream")
+                ? "원본에 바꿀 소리(또는 영상)가 없습니다"
+                : $"ffmpeg 오류: {LastLines(error, 1)}");
+        }
     }
 
     static string? Locate()

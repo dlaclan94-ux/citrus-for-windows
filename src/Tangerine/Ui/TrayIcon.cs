@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Linq;
 using Tangerine.Conversion;
 using Tangerine.Services;
 using Drawing = System.Drawing;
@@ -96,7 +97,12 @@ internal sealed class TrayIcon : IDisposable
         if (result.Skipped > 0)
             text += $" 이미 {label} 이거나 바꿀 수 없는 {result.Skipped}개는 건너뛰었습니다.";
         if (result.Failed > 0)
-            text += $" {result.Failed}개 실패 — 기록 폴더의 tangerine.log 를 확인하세요.";
+        {
+            var reason = result.Files.First(f => f.Outcome == FileOutcome.Failed).Error;
+            text += result.Failed == 1 && reason is not null
+                ? $" 실패: {reason}."
+                : $" {result.Failed}개 실패 — 기록 폴더의 tangerine.log 를 확인하세요.";
+        }
 
         Notify(
             result.Failed > 0 ? "일부 변환 실패" : "변환 완료",
