@@ -64,7 +64,8 @@ public partial class RadialMenuWindow : Window
     /// <summary>파일들과 고른 형식. 드롭 처리가 끝난 뒤에 불린다.</summary>
     public event Action<string[], TargetFormat>? FormatChosen;
 
-    sealed record Slice(Path Shape, TranslateTransform Offset, Point Direction, TextBlock Icon, TextBlock Label, TextBlock? Hint);
+    /// <param name="Heat">마우스가 올라가면 보여 줄 열화상 띠. 고대비 모드에서는 없고 강조색으로 칠한다.</param>
+    sealed record Slice(Path Shape, UIElement? Heat, TranslateTransform Offset, Point Direction, TextBlock Icon, TextBlock Label, TextBlock? Hint);
 
     public RadialMenuWindow()
     {
@@ -237,11 +238,13 @@ public partial class RadialMenuWindow : Window
         UpdateCenter();
     }
 
-    /// <summary>고른 조각은 귤색으로 칠하고 바깥으로 살짝 밀어낸다.</summary>
+    /// <summary>고른 조각은 열화상 띠를 보여 주고 바깥으로 살짝 밀어낸다.</summary>
     void Paint(Slice s, bool on)
     {
         var p = _palette;
-        s.Shape.Fill = on ? p.Flesh : p.Glass;
+        if (s.Heat is not null)
+            s.Heat.Visibility = on ? Visibility.Visible : Visibility.Collapsed;
+        s.Shape.Fill = on && p.Flesh is not null ? p.Flesh : p.Glass;
         s.Icon.Foreground = s.Label.Foreground = on ? p.OnFlesh : p.Ink;
         if (s.Hint is not null)
             s.Hint.Foreground = on ? p.OnFlesh : p.SubInk;
@@ -299,11 +302,14 @@ public partial class RadialMenuWindow : Window
             var group = new Canvas { RenderTransform = offset, IsHitTestVisible = false };
             var shape = new Path
             {
-                Data = n == 1 ? RoundedRing() : SliceGeometry(mid - step / 2, mid + step / 2),
+                Data = n == 1 ? RingGeometry() : SliceGeometry(mid - step / 2, mid + step / 2),
                 Stroke = _palette.SliceEdge,
                 StrokeThickness = 1,
             };
             group.Children.Add(shape);
+            var heat = _palette.Flesh is null ? Heat(n == 1, mid - step / 2, mid + step / 2, labelRadius) : null;
+            if (heat is not null)
+                group.Children.Add(heat);
 
             var at = Polar(labelRadius, mid);
             var hasHint = target.Hint is not null;
@@ -327,7 +333,7 @@ public partial class RadialMenuWindow : Window
             _sliceLayer.Children.Add(group);
             // 조각이 하나(고리 전체)면 밀어낼 방향이 없다
             var direction = n == 1 ? new Point(0, 0) : new Point(Math.Sin(mid), -Math.Cos(mid));
-            var slice = new Slice(shape, offset, direction, icon, label, hint);
+            var slice = new Slice(shape, heat, offset, direction, icon, label, hint);
             _slices.Add(slice);
             Paint(slice, false);
         }
@@ -386,43 +392,113 @@ public partial class RadialMenuWindow : Window
     /// <summary>
     /// 둥근 모서리의 귤 조각. 조각 사이 틈은 어느 반지름에서나 같은 너비가 되도록 옆선을 평행하게 민 뒤,
     /// 그만큼 작게 만든 모양을 둥근 펜으로 부풀려 모서리를 둥글린다.
+    /// shrink 를 주면 윤곽을 그만큼 안쪽으로 민 모양 (열화상 띠). 너무 깊어 모양이 사라지면 null.
     /// </summary>
-    static Geometry SliceGeometry(double from, double to)
+    static Geometry? SliceGeometry(double from, double to, double shrink = 0)
     {
-        const double inset = SliceGap / 2 + SliceCorner;
-        const double inner = SliceInner + SliceCorner;
-        const double outer = SliceOuter - SliceCorner;
+        // 둥근 모서리 모양을 d 만큼 안으로 밀기 = 모서리 반지름을 d 만큼 줄이기 (반지름보다 깊으면 뼈대 다각형 자체를 민다)
+        var round = Math.Max(SliceCorner - shrink, 0);
+        var core = Math.Max(SliceCorner, shrink);
+        var inset = SliceGap / 2 + core;
+        var inner = SliceInner + core;
+        var outer = SliceOuter - core;
+        if (outer <= inner || inset >= outer)
+            return null;
+
         var outerSpread = Math.Asin(inset / outer);
-        var innerSpread = Math.Asin(inset / inner);
+        var outerSweep = to - from - 2 * outerSpread;
+        if (outerSweep <= 0)
+            return null;
 
         var figure = new PathFigure { StartPoint = Polar(outer, from + outerSpread), IsClosed = true };
-        var outerSweep = to - from - 2 * outerSpread;
-        var innerSweep = to - from - 2 * innerSpread;
         figure.Segments.Add(new ArcSegment(Polar(outer, to - outerSpread), new Size(outer, outer), 0, outerSweep > Math.PI, SweepDirection.Clockwise, true));
+        var innerSweep = inset < inner ? to - from - 2 * Math.Asin(inset / inner) : 0;
         if (innerSweep > 0)
         {
+            var innerSpread = Math.Asin(inset / inner);
             figure.Segments.Add(new LineSegment(Polar(inner, to - innerSpread), true));
             figure.Segments.Add(new ArcSegment(Polar(inner, from + innerSpread), new Size(inner, inner), 0, innerSweep > Math.PI, SweepDirection.Counterclockwise, true));
         }
         else
         {
             // 조각이 많아 안쪽 끝이 뾰족해지는 경우: 옆선이 만나는 점 하나로 닫는다
-            figure.Segments.Add(new LineSegment(Polar(inset / Math.Sin((to - from) / 2), (from + to) / 2), true));
+            var tip = inset / Math.Sin((to - from) / 2);
+            if (tip >= outer)
+                return null;
+            figure.Segments.Add(new LineSegment(Polar(tip, (from + to) / 2), true));
         }
 
-        var core = new PathGeometry([figure]);
-        var round = new Pen(Brushes.Black, 2 * SliceCorner) { LineJoin = PenLineJoin.Round };
-        var slice = Geometry.Combine(core, core.GetWidenedPathGeometry(round), GeometryCombineMode.Union, null);
+        Geometry slice = new PathGeometry([figure]);
+        if (round > 0)
+        {
+            var pen = new Pen(Brushes.Black, 2 * round) { LineJoin = PenLineJoin.Round };
+            slice = Geometry.Combine(slice, slice.GetWidenedPathGeometry(pen), GeometryCombineMode.Union, null);
+        }
         slice.Freeze();
         return slice;
     }
 
-    static Geometry RoundedRing()
+    /// <summary>조각이 하나뿐일 때의 고리. shrink 만큼 안팎에서 줄인 고리 (너무 깊으면 null).</summary>
+    static Geometry? RingGeometry(double shrink = 0)
     {
+        var inner = SliceInner + shrink;
+        var outer = SliceOuter - shrink;
+        if (outer <= inner)
+            return null;
         var c = new Point(Center, Center);
-        var ring = new CombinedGeometry(GeometryCombineMode.Exclude, new EllipseGeometry(c, SliceOuter, SliceOuter), new EllipseGeometry(c, SliceInner, SliceInner));
+        var ring = new CombinedGeometry(GeometryCombineMode.Exclude, new EllipseGeometry(c, outer, outer), new EllipseGeometry(c, inner, inner));
         ring.Freeze();
         return ring;
+    }
+
+    /// <summary>
+    /// 열화상 띠: 윤곽에서 안쪽으로 들어간 깊이(가장 깊은 곳 = 1) 와 색. 얕은 것부터.
+    /// 첫 띠의 색은 윤곽 바로 안쪽(깊이 0 부터)에도 깔린다. 색 조절 미리보기에서 고른 값 (살구 → 주황 → 노랑).
+    /// </summary>
+    static readonly (double Depth, Color Color)[] ThermalBands =
+    [
+        (0.05, Color.FromRgb(0xFF, 0xC4, 0x9A)),
+        (0.05, Color.FromRgb(0xFF, 0x8A, 0x3D)),
+        (0.60, Color.FromRgb(0xFF, 0xF2, 0x6A)),
+    ];
+    const double ThermalBlur = 0.30;    // 띠 사이 흐림 (가장 깊은 거리에 대한 비율, 최대 14px)
+    const double ThermalOpacity = 1.0;
+
+    /// <summary>
+    /// 마우스가 올라간 조각의 열화상. 조각 윤곽을 한 겹씩 안으로 민 띠를 겹쳐 칠하고 흐려서 잇는다.
+    /// 조각 모양을 넘지 않도록 원래 조각으로 잘라 두고, 평소에는 숨겨 둔다.
+    /// </summary>
+    static UIElement Heat(bool ring, double from, double to, double labelRadius)
+    {
+        // 가장 깊이 들어갈 수 있는 거리: 조각 폭과 두께 중 좁은 쪽의 절반
+        var width = ring ? double.MaxValue : (to - from) * labelRadius - SliceGap;
+        var deepest = Math.Min(width, SliceOuter - SliceInner) / 2;
+
+        var bands = new Canvas
+        {
+            Effect = new BlurEffect { Radius = Math.Min(deepest * ThermalBlur, 14) },
+            CacheMode = new BitmapCache(), // 밀려 나오는 애니메이션 동안 흐림을 다시 계산하지 않게
+        };
+        // 첫 띠 색을 조각 밖까지 깔아 둔다. 그래야 흐릴 때 바깥의 빈 곳이 섞여 가장자리가 옅어지지 않는다.
+        var under = new Rectangle { Width = Side, Height = Side, Fill = new SolidColorBrush(ThermalBands[0].Color) };
+        bands.Children.Add(under);
+        foreach (var (depth, color) in ThermalBands)
+        {
+            var band = ring ? RingGeometry(deepest * depth) : SliceGeometry(from, to, deepest * depth);
+            if (band is null)
+                break;
+            bands.Children.Add(new Path { Data = band, Fill = new SolidColorBrush(color) });
+        }
+
+        var heat = new Canvas
+        {
+            Clip = ring ? RingGeometry() : SliceGeometry(from, to),
+            Visibility = Visibility.Collapsed,
+            IsHitTestVisible = false,
+            Opacity = ThermalOpacity,
+        };
+        heat.Children.Add(bands);
+        return heat;
     }
 
     /// <summary>
@@ -550,7 +626,7 @@ public partial class RadialMenuWindow : Window
     /// <param name="Peel">껍질 (조각 사이 틈과 바깥 테두리로 보이는 유리)</param>
     /// <param name="Glass">고르지 않은 조각</param>
     /// <param name="Flesh">고른 조각 (귤색)</param>
-    sealed record Palette(bool Translucent, Brush Peel, Brush Glass, Brush HubGlass, Brush Edge, Brush Rim, Brush Flesh, Brush Ink, Brush SubInk, Brush OnFlesh)
+    sealed record Palette(bool Translucent, Brush Peel, Brush Glass, Brush HubGlass, Brush Edge, Brush Rim, Brush? Flesh, Brush Ink, Brush SubInk, Brush OnFlesh)
     {
         /// <summary>조각 윤곽. 라이트 모드에서는 흰 빛 테두리가 흰 조각에 묻히므로 옅은 어두운 선을 쓴다.</summary>
         public Brush SliceEdge { get; init; } = Rim;
@@ -573,8 +649,9 @@ public partial class RadialMenuWindow : Window
             // 투명 효과를 끈 사람에게는 거의 불투명한 판을 보여 준다 (Liquid Glass 의 "투명도 줄이기" 대응)
             byte A(byte glassy) => translucent ? glassy : (byte)0xFF;
 
-            var flesh = Vertical(Color.FromRgb(0xFF, 0x9F, 0x43), Color.FromRgb(0xFF, 0x62, 0x1A));
-            var white = Solid(Colors.White);
+            Brush? flesh = null; // 고른 조각은 열화상 띠(Heat)를 덮는다. 바탕 유리는 그대로
+            // 열화상 가운데의 밝은 노랑 위에서도 읽히도록 고른 조각의 글자는 어둡게
+            var white = Solid(Color.FromRgb(0x1D, 0x1D, 0x1F));
             return light
                 ? new Palette(translucent,
                     // 흰 화면 위에서도 조각 사이 틈이 보이도록 껍질은 옅은 회색 유리
