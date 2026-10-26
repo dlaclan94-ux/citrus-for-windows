@@ -25,6 +25,13 @@
 | GIF (위에 더해) | MP4, WEBM | FFmpeg |
 | 영상 — MP4, MOV, M4V, MKV, AVI, WEBM, WMV, FLV, MPG, 3GP, TS, MTS | MP4, MOV, MKV(H.264), WEBM(VP9), AVI, GIF(움짤), MP3·WAV·M4A(소리만) | FFmpeg |
 | 오디오 — MP3, WAV, M4A, AAC, FLAC, OGG, OPUS, WMA, AIFF | MP3, WAV, M4A, FLAC, OGG, OPUS, AIFF | FFmpeg |
+| 문서 — HWP, HWPX | PDF | 설치된 한글 |
+| 문서 — DOC, DOCX, TXT / XLS, XLSX / PPT, PPTX | PDF | 설치된 Word / Excel / PowerPoint |
+| 무엇이든 (파일·폴더, 여러 개) | ZIP — 끌어 온 것을 모두 묶어 하나로 | 반디집 (없으면 Windows 기본 ZIP) |
+
+- 압축은 메뉴의 마지막 조각에 늘 있습니다. 파일 하나면 `그이름.zip`, 여럿이면 들어 있던 `폴더이름.zip` 을 만듭니다.
+- 문서 변환은 한글·Office 를 보이지 않게 띄워 PDF 로 저장합니다. 매크로는 실행하지 않고, 암호가 걸린 문서는 변환하지 않습니다.
+  Excel 은 모든 시트를, TXT 는 맑은 고딕으로 PDF 를 만듭니다. 문서는 한 번에 하나씩 차례로 바꿉니다.
 
 ### 알림 영역 메뉴 (아이콘 오른쪽 클릭)
 
@@ -63,9 +70,9 @@ dotnet run --project src/Tangerine          # 실행
 |---|---|
 | `src/Tangerine.Core/` | Windows 와 무관한 규칙 — 형식 목록(`FormatCatalog`), 결과 파일 이름(`OutputPaths`), ffmpeg 인자(`FfmpegArguments`) |
 | `src/Tangerine/Interop/DragWatcher.cs` | 전역 저수준 마우스 훅. 왼쪽 버튼으로 끄는 중 Shift 가 눌리면 메뉴를 띄움 |
-| `src/Tangerine/Ui/RadialMenuWindow.*` | 투명 원형 메뉴 창. 이 창이 드롭 대상이며, 항상 "복사" 로 답해 탐색기가 원본을 옮기지 않게 함 |
+| `src/Tangerine/Ui/RadialMenuWindow.*` | 귤 단면 모양 원형 메뉴 창 (Liquid Glass 풍 유리). 이 창이 드롭 대상이며, 항상 "복사" 로 답해 탐색기가 원본을 옮기지 않게 함 |
 | `src/Tangerine/Ui/TrayIcon.cs` | 알림 영역 아이콘·메뉴·알림 |
-| `src/Tangerine/Conversion/` | Magick.NET 이미지 변환, ffmpeg.exe 실행, 동시 변환 관리 |
+| `src/Tangerine/Conversion/` | Magick.NET 이미지 변환, ffmpeg.exe 실행, 한글·Office 문서 → PDF (`DocumentConverter`), 반디집 압축 (`Archiver`), 동시 변환 관리 |
 
 ### 다음에 할 일
 
@@ -73,7 +80,7 @@ dotnet run --project src/Tangerine          # 실행
 
 - `Ctrl` + 끌기: 파일 도구 — 압축(비율·목표 용량), 자르기, 영상 자르기·나누기, PDF 합치기·나누기, 메타데이터 삭제, QR 읽기
 - `Alt` + 끌기: 파일 동작 — 복사, 이동, 경로 복사, 터미널 열기
-- 문서 변환 (Word·PowerPoint·EPUB → PDF 등, LibreOffice/Pandoc)
+- 한글·Office 가 없는 PC 를 위한 문서 변환 (LibreOffice 등), EPUB
 - 탐색기 오른쪽 클릭 "변환" 메뉴
 
 ## 라이선스 참고

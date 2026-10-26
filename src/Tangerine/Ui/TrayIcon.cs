@@ -92,6 +92,19 @@ internal sealed class TrayIcon : IDisposable
         _busy = Math.Max(0, _busy - result.Files.Count);
         UpdateText();
 
+        if (result.Target.Engine == Core.ConversionEngine.Archive)
+        {
+            var archive = result.FirstOutput;
+            Notify(
+                archive is null ? "압축 실패" : "압축 완료",
+                archive is null
+                    ? $"압축하지 못했습니다: {result.Files[0].Error}"
+                    : $"{result.Files.Count}개 항목을 {System.IO.Path.GetFileName(archive)} 로 압축했습니다.",
+                archive is null ? Forms.ToolTipIcon.Warning : Forms.ToolTipIcon.Info,
+                reveal: archive);
+            return;
+        }
+
         var label = result.Target.Label;
         var text = result.Converted > 0 ? $"{label} 파일 {result.Converted}개를 만들었습니다." : $"{label} 파일을 만들지 못했습니다.";
         if (result.Skipped > 0)

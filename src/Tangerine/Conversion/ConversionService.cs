@@ -36,8 +36,32 @@ internal sealed class ConversionService
 
     public async Task<BatchResult> ConvertAsync(IReadOnlyList<string> files, TargetFormat menuTarget)
     {
+        if (menuTarget.Engine == ConversionEngine.Archive)
+            return await ArchiveAsync(files, menuTarget);
+
         var results = await Task.WhenAll(files.Select(f => ConvertOneAsync(f, menuTarget.Id)));
         return new BatchResult(menuTarget, results);
+    }
+
+    /// <summary>압축은 파일마다가 아니라 끌어 온 것 전부를 ZIP 하나로 묶는다.</summary>
+    async Task<BatchResult> ArchiveAsync(IReadOnlyList<string> items, TargetFormat target)
+    {
+        await _slots.WaitAsync();
+        try
+        {
+            var output = await Archiver.CreateAsync(items);
+            AppLog.Write($"압축: {items.Count}개 → {output}");
+            return new BatchResult(target, items.Select(i => new FileResult(i, output, FileOutcome.Converted)).ToArray());
+        }
+        catch (Exception ex)
+        {
+            AppLog.Write($"압축 실패: {ex.Message}");
+            return new BatchResult(target, items.Select(i => new FileResult(i, null, FileOutcome.Failed, ex.Message)).ToArray());
+        }
+        finally
+        {
+            _slots.Release();
+        }
     }
 
     async Task<FileResult> ConvertOneAsync(string source, string targetId)
@@ -53,10 +77,18 @@ internal sealed class ConversionService
         {
             output = OutputPaths.Reserve(source, target.Extension);
 
-            if (target.Engine == ConversionEngine.Magick)
-                await Task.Run(() => ImageConverter.Convert(source, output, target.Id));
-            else
-                await _ffmpeg.RunAsync(FfmpegArguments.Build(source, output, target.Id));
+            switch (target.Engine)
+            {
+                case ConversionEngine.Magick:
+                    await Task.Run(() => ImageConverter.Convert(source, output, target.Id));
+                    break;
+                case ConversionEngine.Document:
+                    await DocumentConverter.ConvertAsync(source, output);
+                    break;
+                default:
+                    await _ffmpeg.RunAsync(FfmpegArguments.Build(source, output, target.Id));
+                    break;
+            }
 
             if (new FileInfo(output).Length == 0)
                 throw new InvalidOperationException("결과 파일이 비어 있습니다.");

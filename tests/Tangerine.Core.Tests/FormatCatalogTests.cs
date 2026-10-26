@@ -9,19 +9,54 @@ public class FormatCatalogTests
     [InlineData("shot.heic", MediaKind.Image)]
     [InlineData("clip.MOV", MediaKind.Video)]
     [InlineData("song.flac", MediaKind.Audio)]
+    [InlineData("보고서.HWPX", MediaKind.Document)]
+    [InlineData("notes.txt", MediaKind.Document)]
     public void KindOf_recognizes_extensions_case_insensitively(string path, MediaKind expected)
     {
         Assert.Equal(expected, FormatCatalog.KindOf(path));
     }
 
     [Theory]
-    [InlineData("notes.txt")]
+    [InlineData("drawing.dwg")]
     [InlineData("no-extension")]
-    public void KindOf_returns_null_for_unsupported_files(string path)
+    public void Unsupported_files_can_still_be_zipped(string path)
     {
         Assert.Null(FormatCatalog.KindOf(path));
         Assert.Empty(FormatCatalog.TargetsFor(path));
-        Assert.Empty(FormatCatalog.MenuTargets([path]));
+        Assert.Equal([FormatCatalog.Zip], FormatCatalog.MenuTargets([path]));
+    }
+
+    [Theory]
+    [InlineData("a.hwp")]
+    [InlineData("a.docx")]
+    [InlineData("a.xls")]
+    [InlineData("a.pptx")]
+    [InlineData("a.txt")]
+    public void Documents_become_pdf_through_office_or_hancom(string path)
+    {
+        Assert.Equal(["pdf", "zip"], FormatCatalog.MenuTargets([path]).Select(t => t.Id));
+        Assert.Equal(ConversionEngine.Document, FormatCatalog.Resolve(path, "pdf")!.Engine);
+    }
+
+    [Fact]
+    public void Images_and_documents_share_pdf_but_each_uses_its_own_engine()
+    {
+        Assert.Equal(["pdf", "zip"], FormatCatalog.MenuTargets(["scan.jpg", "report.docx"]).Select(t => t.Id));
+        Assert.Equal(ConversionEngine.Magick, FormatCatalog.Resolve("scan.jpg", "pdf")!.Engine);
+        Assert.Equal(ConversionEngine.Document, FormatCatalog.Resolve("report.docx", "pdf")!.Engine);
+    }
+
+    [Fact]
+    public void Zip_is_always_the_last_slice()
+    {
+        Assert.Equal(FormatCatalog.Zip, FormatCatalog.MenuTargets(["photo.png"])[^1]);
+        Assert.Equal(FormatCatalog.Zip, FormatCatalog.MenuTargets(["clip.mp4", "song.mp3"])[^1]);
+    }
+
+    [Fact]
+    public void A_folder_can_only_be_zipped()
+    {
+        Assert.Equal([FormatCatalog.Zip], FormatCatalog.MenuTargets([Path.GetTempPath(), "photo.png"]));
     }
 
     [Fact]
@@ -66,13 +101,13 @@ public class FormatCatalogTests
         var ids = FormatCatalog.MenuTargets(["clip.mp4", "anim.gif"]).Select(t => t.Id).ToList();
 
         // 첫 파일(영상)의 메뉴 순서를 따른다
-        Assert.Equal(["mp4", "webm", "gif"], ids);
+        Assert.Equal(["mp4", "webm", "gif", "zip"], ids);
     }
 
     [Fact]
-    public void Image_and_audio_have_nothing_in_common()
+    public void Image_and_audio_can_only_be_zipped_together()
     {
-        Assert.Empty(FormatCatalog.MenuTargets(["photo.png", "song.mp3"]));
+        Assert.Equal([FormatCatalog.Zip], FormatCatalog.MenuTargets(["photo.png", "song.mp3"]));
     }
 
     [Theory]

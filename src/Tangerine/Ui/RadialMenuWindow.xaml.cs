@@ -325,7 +325,9 @@ public partial class RadialMenuWindow : Window
             }
 
             _sliceLayer.Children.Add(group);
-            var slice = new Slice(shape, offset, new Point(Math.Sin(mid), -Math.Cos(mid)), icon, label, hint);
+            // 조각이 하나(고리 전체)면 밀어낼 방향이 없다
+            var direction = n == 1 ? new Point(0, 0) : new Point(Math.Sin(mid), -Math.Cos(mid));
+            var slice = new Slice(shape, offset, direction, icon, label, hint);
             _slices.Add(slice);
             Paint(slice, false);
         }
@@ -374,6 +376,7 @@ public partial class RadialMenuWindow : Window
     /// <summary>바꿀 결과가 어떤 종류인지 보여 주는 아이콘 (Segoe Fluent Icons).</summary>
     static string IconOf(TargetFormat target) => target.Id switch
     {
+        "zip" => "",
         "pdf" => "",
         "mp4" or "mov" or "mkv" or "webm" or "avi" => "",
         "mp3" or "wav" or "m4a" or "flac" or "ogg" or "opus" or "aiff" => "",
@@ -496,7 +499,8 @@ public partial class RadialMenuWindow : Window
     {
         if (!data.GetDataPresent(DataFormats.FileDrop))
             return [];
-        return (data.GetData(DataFormats.FileDrop) as string[] ?? []).Where(System.IO.File.Exists).ToArray();
+        // 폴더도 받는다 (압축할 수 있으므로)
+        return (data.GetData(DataFormats.FileDrop) as string[] ?? []).Where(p => System.IO.File.Exists(p) || System.IO.Directory.Exists(p)).ToArray();
     }
 
     static Point Polar(double radius, double angle) =>

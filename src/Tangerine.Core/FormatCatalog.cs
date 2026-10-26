@@ -5,6 +5,7 @@ public enum MediaKind
     Image,
     Video,
     Audio,
+    Document,
 }
 
 public enum ConversionEngine
@@ -14,6 +15,12 @@ public enum ConversionEngine
 
     /// <summary>ffmpeg.exe (영상·오디오, GIF ↔ 영상)</summary>
     Ffmpeg,
+
+    /// <summary>설치된 한글·Word·Excel·PowerPoint 자동화 (문서 → PDF)</summary>
+    Document,
+
+    /// <summary>끌어 온 파일·폴더를 모두 묶어 압축 파일 하나를 만든다 (반디집)</summary>
+    Archive,
 }
 
 /// <param name="Id">형식 식별자. 원형 메뉴에서 고른 칸을 파일마다 다시 찾을 때 쓴다.</param>
@@ -75,6 +82,14 @@ public static class FormatCatalog
         Media("aiff", "AIFF"),
     ];
 
+    public static readonly IReadOnlyList<TargetFormat> DocumentTargets =
+    [
+        new("pdf", "PDF", ".pdf", ConversionEngine.Document),
+    ];
+
+    /// <summary>어떤 파일·폴더든 메뉴 마지막 칸에 나오는 압축.</summary>
+    public static readonly TargetFormat Zip = new("zip", "ZIP", ".zip", ConversionEngine.Archive, "압축");
+
     /// <summary>GIF 는 이미지이면서 짧은 영상이기도 해서 영상으로도 바꿀 수 있다.</summary>
     static readonly IReadOnlyList<TargetFormat> GifExtras =
     [
@@ -102,6 +117,7 @@ public static class FormatCatalog
             MediaKind.Image => ImageTargets,
             MediaKind.Video => VideoTargets,
             MediaKind.Audio => AudioTargets,
+            MediaKind.Document => DocumentTargets,
             _ => [],
         };
     }
@@ -113,12 +129,15 @@ public static class FormatCatalog
     /// 여러 파일을 한꺼번에 끌어 왔을 때 원형 메뉴에 보여 줄 형식.
     /// 모든 파일이 바뀔 수 있는 형식만 남기고, 모든 파일이 이미 그 형식이면 뺀다.
     /// (JPG 와 PNG 를 같이 끌어 와 JPG 를 고르면 PNG 만 바뀌고 JPG 는 건너뛴다.)
+    /// 압축(ZIP)은 무엇을 끌어 오든 마지막 칸에 붙는다. 폴더가 섞이면 압축만 할 수 있다.
     /// </summary>
     public static IReadOnlyList<TargetFormat> MenuTargets(IEnumerable<string> paths)
     {
         var files = paths.ToList();
         if (files.Count == 0)
             return [];
+        if (files.Any(Directory.Exists))
+            return [Zip];
 
         IEnumerable<TargetFormat> common = TargetsFor(files[0]);
         foreach (var file in files.Skip(1))
@@ -127,7 +146,7 @@ public static class FormatCatalog
             common = common.Where(t => ids.Contains(t.Id));
         }
 
-        return common.Where(t => !files.All(f => IsSameFormat(f, t))).ToList();
+        return [.. common.Where(t => !files.All(f => IsSameFormat(f, t))), Zip];
     }
 
     /// <summary>원형 메뉴에서 고른 형식을 이 파일에 맞는 변환 방법으로 다시 찾는다.</summary>
@@ -149,6 +168,8 @@ public static class FormatCatalog
             kinds[ext] = MediaKind.Video;
         foreach (var ext in new[] { ".mp3", ".wav", ".m4a", ".aac", ".flac", ".ogg", ".opus", ".wma", ".aiff" })
             kinds[ext] = MediaKind.Audio;
+        foreach (var ext in new[] { ".hwp", ".hwpx", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt" })
+            kinds[ext] = MediaKind.Document;
         return kinds;
     }
 }
