@@ -23,9 +23,10 @@ public static class FfmpegArguments
             "mp4" => [.. H264, "-movflags", "+faststart"],
             "mov" => [.. H264, "-movflags", "+faststart"],
             "mkv" => H264,
+            // GIF 는 팔레트 색(pal8)이라 VP9 가 받지 못하므로 yuv420p 로 바꿔 넣는다
             "webm" =>
             [
-                "-c:v", "libvpx-vp9", "-crf", "32", "-b:v", "0", "-row-mt", "1", "-deadline", "good", "-cpu-used", "4",
+                "-c:v", "libvpx-vp9", "-pix_fmt", "yuv420p", "-crf", "32", "-b:v", "0", "-row-mt", "1", "-deadline", "good", "-cpu-used", "4",
                 "-c:a", "libopus", "-b:a", "128k",
             ],
             "avi" => ["-c:v", "mpeg4", "-q:v", "3", "-tag:v", "XVID", "-c:a", "libmp3lame", "-q:a", "2"],

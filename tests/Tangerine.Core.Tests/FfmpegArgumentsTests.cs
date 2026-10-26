@@ -28,6 +28,14 @@ public class FfmpegArgumentsTests
         Assert.Contains(args, a => a.StartsWith("scale=trunc(iw/2)*2"));
     }
 
+    [Fact]
+    public void Webm_forces_yuv420p_so_gif_palettes_encode()
+    {
+        var args = FfmpegArguments.Build(@"C:\in\loop.gif", @"C:\in\loop.webm", "webm");
+
+        Assert.Equal("yuv420p", args[args.ToList().IndexOf("-pix_fmt") + 1]);
+    }
+
     [Theory]
     [InlineData("mp3")]
     [InlineData("wav")]
