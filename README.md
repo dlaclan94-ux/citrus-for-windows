@@ -58,6 +58,7 @@
 dotnet test tests/Tangerine.Core.Tests     # 형식 목록·파일 이름·ffmpeg 인자 테스트 (맥에서도 실행됨)
 .\scripts\fetch-ffmpeg.ps1                  # src\Tangerine\tools\ffmpeg.exe 받기 (처음 한 번)
 dotnet run --project src/Tangerine          # 실행
+.\scripts\install-local.ps1                 # 이 PC 에 설치: %LOCALAPPDATA%\Programs\Tangerine, 로그인 시 자동 실행, 바탕화면·시작 메뉴 바로가기
 ```
 
 - .NET 10 SDK 필요. 맥에서도 `dotnet build src/Tangerine/Tangerine.csproj` 로 컴파일까지는 확인할 수 있습니다 (실행은 Windows 에서만).

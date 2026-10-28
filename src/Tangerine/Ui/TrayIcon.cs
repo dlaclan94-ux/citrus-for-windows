@@ -13,7 +13,6 @@ internal sealed class TrayIcon : IDisposable
 {
     readonly Forms.NotifyIcon _icon;
     readonly Drawing.Icon _image;
-    readonly IntPtr _imageHandle;
     readonly Forms.ToolStripMenuItem _enabledItem;
     readonly Forms.ToolStripMenuItem _explorerOnlyItem;
     readonly Forms.ToolStripMenuItem _startupItem;
@@ -26,7 +25,9 @@ internal sealed class TrayIcon : IDisposable
 
     public TrayIcon(AppSettings settings)
     {
-        _image = DrawTangerine(out _imageHandle);
+        // 실행 파일과 같은 귤 단면 아이콘에서 알림 영역 크기(보통 16px, 배율에 따라 더 큼)를 고른다
+        using (var ico = typeof(TrayIcon).Assembly.GetManifestResourceStream("Tangerine.ico")!)
+            _image = new Drawing.Icon(ico, Forms.SystemInformation.SmallIconSize);
 
         _enabledItem = new Forms.ToolStripMenuItem("Shift 끌기로 변환 켜기") { CheckOnClick = true, Checked = settings.Enabled };
         _enabledItem.CheckedChanged += (_, _) =>
@@ -136,7 +137,6 @@ internal sealed class TrayIcon : IDisposable
         _icon.Visible = false;
         _icon.Dispose();
         _image.Dispose();
-        Interop.NativeMethods.DestroyIcon(_imageHandle);
     }
 
     void UpdateText()
@@ -166,27 +166,4 @@ internal sealed class TrayIcon : IDisposable
         }
     }
 
-    /// <summary>아이콘 파일 없이 귤 모양을 그린다.</summary>
-    static Drawing.Icon DrawTangerine(out IntPtr handle)
-    {
-        using var bitmap = new Drawing.Bitmap(32, 32);
-        using (var g = Drawing.Graphics.FromImage(bitmap))
-        {
-            g.SmoothingMode = Drawing.Drawing2D.SmoothingMode.AntiAlias;
-            using var body = new Drawing.SolidBrush(Drawing.Color.FromArgb(255, 138, 0));
-            using var rim = new Drawing.Pen(Drawing.Color.FromArgb(214, 100, 0), 1.5f);
-            using var shine = new Drawing.SolidBrush(Drawing.Color.FromArgb(130, 255, 255, 255));
-            using var leaf = new Drawing.SolidBrush(Drawing.Color.FromArgb(76, 175, 80));
-            using var stem = new Drawing.Pen(Drawing.Color.FromArgb(110, 70, 20), 2f);
-
-            g.FillEllipse(body, 3, 7, 26, 23);
-            g.DrawEllipse(rim, 3, 7, 26, 23);
-            g.FillEllipse(shine, 8, 11, 7, 5);
-            g.DrawLine(stem, 16, 9, 15, 4);
-            g.FillEllipse(leaf, 16, 1, 11, 6);
-        }
-
-        handle = bitmap.GetHicon();
-        return Drawing.Icon.FromHandle(handle);
-    }
 }
