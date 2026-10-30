@@ -16,11 +16,14 @@ internal enum FileOutcome
     Failed,
 }
 
-internal sealed record FileResult(string Source, string? Output, FileOutcome Outcome, string? Error = null);
+/// <param name="Output">만든 파일 (여러 개면 첫 번째)</param>
+/// <param name="Made">만든 파일 수. PDF → 그림은 쪽 수만큼.</param>
+internal sealed record FileResult(string Source, string? Output, FileOutcome Outcome, string? Error = null, int Made = 1);
 
 internal sealed record BatchResult(TargetFormat Target, IReadOnlyList<FileResult> Files)
 {
     public int Converted => Files.Count(f => f.Outcome == FileOutcome.Converted);
+    public int Made => Files.Where(f => f.Outcome == FileOutcome.Converted).Sum(f => f.Made);
     public int Skipped => Files.Count(f => f.Outcome == FileOutcome.Skipped);
     public int Failed => Files.Count(f => f.Outcome == FileOutcome.Failed);
     public string? FirstOutput => Files.FirstOrDefault(f => f.Output is not null)?.Output;
@@ -75,6 +78,14 @@ internal sealed class ConversionService
         string? output = null;
         try
         {
+            // PDF 는 쪽마다 파일을 따로 만들므로 이름도 스스로 정한다
+            if (target.Engine == ConversionEngine.PdfPages)
+            {
+                var pages = await PdfPages.ConvertAsync(source, target.Extension);
+                AppLog.Write($"변환: {source} → {pages.Count}쪽 ({pages[0]} …)");
+                return new FileResult(source, pages[0], FileOutcome.Converted, Made: pages.Count);
+            }
+
             output = OutputPaths.Reserve(source, target.Extension);
 
             switch (target.Engine)

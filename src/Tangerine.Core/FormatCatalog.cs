@@ -21,6 +21,9 @@ public enum ConversionEngine
 
     /// <summary>끌어 온 파일·폴더를 모두 묶어 압축 파일 하나를 만든다 (반디집)</summary>
     Archive,
+
+    /// <summary>Windows 기본 PDF 렌더러로 PDF 를 쪽마다 그림으로</summary>
+    PdfPages,
 }
 
 /// <param name="Id">형식 식별자. 원형 메뉴에서 고른 칸을 파일마다 다시 찾을 때 쓴다.</param>
@@ -87,6 +90,13 @@ public static class FormatCatalog
         new("pdf", "PDF", ".pdf", ConversionEngine.Document),
     ];
 
+    /// <summary>PDF 는 쪽마다 그림 한 장씩.</summary>
+    public static readonly IReadOnlyList<TargetFormat> PdfTargets =
+    [
+        new("jpg", "JPG", ".jpg", ConversionEngine.PdfPages, "쪽마다"),
+        new("png", "PNG", ".png", ConversionEngine.PdfPages, "쪽마다"),
+    ];
+
     /// <summary>어떤 파일·폴더든 메뉴 마지막 칸에 나오는 압축.</summary>
     public static readonly TargetFormat Zip = new("zip", "ZIP", ".zip", ConversionEngine.Archive, "압축");
 
@@ -117,6 +127,7 @@ public static class FormatCatalog
             MediaKind.Image => ImageTargets,
             MediaKind.Video => VideoTargets,
             MediaKind.Audio => AudioTargets,
+            MediaKind.Document when ext == ".pdf" => PdfTargets,
             MediaKind.Document => DocumentTargets,
             _ => [],
         };
@@ -168,7 +179,7 @@ public static class FormatCatalog
             kinds[ext] = MediaKind.Video;
         foreach (var ext in new[] { ".mp3", ".wav", ".m4a", ".aac", ".flac", ".ogg", ".opus", ".wma", ".aiff" })
             kinds[ext] = MediaKind.Audio;
-        foreach (var ext in new[] { ".hwp", ".hwpx", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt" })
+        foreach (var ext in new[] { ".hwp", ".hwpx", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".txt", ".pdf" })
             kinds[ext] = MediaKind.Document;
         return kinds;
     }

@@ -47,6 +47,22 @@ public class FormatCatalogTests
     }
 
     [Fact]
+    public void Pdf_becomes_jpg_or_png_page_by_page()
+    {
+        Assert.Equal(["jpg", "png", "zip"], FormatCatalog.MenuTargets(["도면.PDF"]).Select(t => t.Id));
+        Assert.Equal(ConversionEngine.PdfPages, FormatCatalog.Resolve("도면.pdf", "png")!.Engine);
+        // 이미지 → PDF 는 그대로 Magick
+        Assert.Equal(ConversionEngine.Magick, FormatCatalog.Resolve("scan.png", "pdf")!.Engine);
+    }
+
+    [Fact]
+    public void Pdf_and_images_share_jpg_and_png()
+    {
+        Assert.Equal(["jpg", "png", "zip"], FormatCatalog.MenuTargets(["도면.pdf", "scan.webp"]).Select(t => t.Id));
+        Assert.Equal(ConversionEngine.Magick, FormatCatalog.Resolve("scan.webp", "jpg")!.Engine);
+    }
+
+    [Fact]
     public void Zip_is_always_the_last_slice()
     {
         Assert.Equal(FormatCatalog.Zip, FormatCatalog.MenuTargets(["photo.png"])[^1]);

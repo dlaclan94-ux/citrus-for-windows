@@ -27,11 +27,14 @@
 | 오디오 — MP3, WAV, M4A, AAC, FLAC, OGG, OPUS, WMA, AIFF | MP3, WAV, M4A, FLAC, OGG, OPUS, AIFF | FFmpeg |
 | 문서 — HWP, HWPX | PDF | 설치된 한글 |
 | 문서 — DOC, DOCX, TXT / XLS, XLSX / PPT, PPTX | PDF | 설치된 Word / Excel / PowerPoint |
+| PDF | JPG, PNG — 쪽마다 한 장 | Windows 기본 PDF 렌더러 |
 | 무엇이든 (파일·폴더, 여러 개) | ZIP — 끌어 온 것을 모두 묶어 하나로 | 반디집 (없으면 Windows 기본 ZIP) |
 
 - 압축은 메뉴의 마지막 조각에 늘 있습니다. 파일 하나면 `그이름.zip`, 여럿이면 들어 있던 `폴더이름.zip` 을 만듭니다.
 - 문서 변환은 한글·Office 를 보이지 않게 띄워 PDF 로 저장합니다. 매크로는 실행하지 않고, 암호가 걸린 문서는 변환하지 않습니다.
   Excel 은 모든 시트를, TXT 는 맑은 고딕으로 PDF 를 만듭니다. 문서는 한 번에 하나씩 차례로 바꿉니다.
+- PDF → 그림은 300dpi(A4 면 2481×3509px), 흰 바탕입니다. 한 쪽이면 `문서.jpg`, 여러 쪽이면 `문서 1쪽.jpg`, `문서 2쪽.jpg` … 를 만듭니다.
+  큰 도면도 긴 변이 10,000px 를 넘지 않게 줄입니다.
 
 ### 알림 영역 메뉴 (아이콘 오른쪽 클릭)
 
@@ -49,7 +52,7 @@
 [Releases](../../releases) 에서 `Tangerine-v*-win-x64.zip` 을 받아 원하는 폴더에 풀고 `Tangerine.exe` 를 실행합니다.
 .NET 설치는 필요 없습니다. 압축 파일 안의 `tools\ffmpeg.exe` 는 영상·오디오 변환에 쓰므로 같이 두세요.
 
-- Windows 10/11 64비트
+- Windows 10 (2004 이상) / 11, 64비트
 - 관리자 권한으로 실행한 프로그램에서 끌어 온 파일은 Windows 보안 정책 때문에 받을 수 없습니다.
 
 ## 개발

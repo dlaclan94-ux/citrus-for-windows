@@ -2,7 +2,8 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0-windows</TargetFramework>
+    <!-- 10.0.19041: Windows 기본 PDF 렌더러(Windows.Data.Pdf)를 쓰기 위해. Windows 10 2004 이상 -->
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <!-- WPF 와 WinForms 를 같이 쓰면 Application, Point 같은 이름이 겹치므로 using 은 직접 적는다 -->

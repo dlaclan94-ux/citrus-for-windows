@@ -107,7 +107,7 @@ internal sealed class TrayIcon : IDisposable
         }
 
         var label = result.Target.Label;
-        var text = result.Converted > 0 ? $"{label} 파일 {result.Converted}개를 만들었습니다." : $"{label} 파일을 만들지 못했습니다.";
+        var text = result.Converted > 0 ? $"{label} 파일 {result.Made}개를 만들었습니다." : $"{label} 파일을 만들지 못했습니다.";
         if (result.Skipped > 0)
             text += $" 이미 {label} 이거나 바꿀 수 없는 {result.Skipped}개는 건너뛰었습니다.";
         if (result.Failed > 0)
