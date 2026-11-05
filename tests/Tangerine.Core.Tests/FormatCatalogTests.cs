@@ -63,6 +63,21 @@ public class FormatCatalogTests
     }
 
     [Fact]
+    public void Several_pdfs_can_be_merged()
+    {
+        Assert.Equal(["merge", "jpg", "png", "zip"], FormatCatalog.MenuTargets(["1장.pdf", "2장.PDF"]).Select(t => t.Id));
+    }
+
+    [Theory]
+    [InlineData("한 개만.pdf")]
+    [InlineData("문서.pdf", "사진.png")]
+    [InlineData("사진1.png", "사진2.png")]
+    public void Merge_is_only_for_two_or_more_pdfs(params string[] files)
+    {
+        Assert.DoesNotContain(FormatCatalog.PdfMerge, FormatCatalog.MenuTargets(files));
+    }
+
+    [Fact]
     public void Zip_is_always_the_last_slice()
     {
         Assert.Equal(FormatCatalog.Zip, FormatCatalog.MenuTargets(["photo.png"])[^1]);

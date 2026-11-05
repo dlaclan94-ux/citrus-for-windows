@@ -93,16 +93,20 @@ internal sealed class TrayIcon : IDisposable
         _busy = Math.Max(0, _busy - result.Files.Count);
         UpdateText();
 
-        if (result.Target.Engine == Core.ConversionEngine.Archive)
+        if (result.Target.Engine is Core.ConversionEngine.Archive or Core.ConversionEngine.PdfMerge)
         {
-            var archive = result.FirstOutput;
+            var zip = result.Target.Engine == Core.ConversionEngine.Archive;
+            var combined = result.FirstOutput;
+            var name = System.IO.Path.GetFileName(combined);
             Notify(
-                archive is null ? "압축 실패" : "압축 완료",
-                archive is null
-                    ? $"압축하지 못했습니다: {result.Files[0].Error}"
-                    : $"{result.Files.Count}개 항목을 {System.IO.Path.GetFileName(archive)} 로 압축했습니다.",
-                archive is null ? Forms.ToolTipIcon.Warning : Forms.ToolTipIcon.Info,
-                reveal: archive);
+                (zip ? "압축" : "합치기") + (combined is null ? " 실패" : " 완료"),
+                combined is null
+                    ? $"{(zip ? "압축하지" : "합치지")} 못했습니다: {result.Files[0].Error}"
+                    : zip
+                        ? $"{result.Files.Count}개 항목을 {name} 로 압축했습니다."
+                        : $"PDF {result.Files.Count}개를 {name} 로 합쳤습니다.",
+                combined is null ? Forms.ToolTipIcon.Warning : Forms.ToolTipIcon.Info,
+                reveal: combined);
             return;
         }
 

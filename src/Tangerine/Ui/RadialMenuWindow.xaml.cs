@@ -383,6 +383,7 @@ public partial class RadialMenuWindow : Window
     static string IconOf(TargetFormat target) => target.Id switch
     {
         "zip" => "",
+        "merge" => "",
         "pdf" => "",
         "mp4" or "mov" or "mkv" or "webm" or "avi" => "",
         "mp3" or "wav" or "m4a" or "flac" or "ogg" or "opus" or "aiff" => "",

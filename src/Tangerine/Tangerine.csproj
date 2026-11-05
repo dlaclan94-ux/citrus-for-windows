@@ -23,6 +23,8 @@
 
   <ItemGroup>
     <PackageReference Include="Magick.NET-Q8-x64" Version="14.17.2" />
+    <!-- 6.2.4 로 고정: 6.5.0 부터 라이선스가 MIT 에서 AGPL-3.0 으로 바뀌었다 -->
+    <PackageReference Include="PDFsharp" Version="6.2.4" />
   </ItemGroup>
 
   <ItemGroup>

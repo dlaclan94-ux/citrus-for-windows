@@ -39,26 +39,28 @@ internal sealed class ConversionService
 
     public async Task<BatchResult> ConvertAsync(IReadOnlyList<string> files, TargetFormat menuTarget)
     {
-        if (menuTarget.Engine == ConversionEngine.Archive)
-            return await ArchiveAsync(files, menuTarget);
+        if (menuTarget.Engine is ConversionEngine.Archive or ConversionEngine.PdfMerge)
+            return await CombineAsync(files, menuTarget);
 
         var results = await Task.WhenAll(files.Select(f => ConvertOneAsync(f, menuTarget.Id)));
         return new BatchResult(menuTarget, results);
     }
 
-    /// <summary>압축은 파일마다가 아니라 끌어 온 것 전부를 ZIP 하나로 묶는다.</summary>
-    async Task<BatchResult> ArchiveAsync(IReadOnlyList<string> items, TargetFormat target)
+    /// <summary>압축과 PDF 합치기는 파일마다가 아니라 끌어 온 것 전부를 결과 하나로 묶는다.</summary>
+    async Task<BatchResult> CombineAsync(IReadOnlyList<string> items, TargetFormat target)
     {
         await _slots.WaitAsync();
         try
         {
-            var output = await Archiver.CreateAsync(items);
-            AppLog.Write($"압축: {items.Count}개 → {output}");
+            var output = target.Engine == ConversionEngine.PdfMerge
+                ? await PdfMerger.MergeAsync(items)
+                : await Archiver.CreateAsync(items);
+            AppLog.Write($"{target.Label}: {items.Count}개 → {output}");
             return new BatchResult(target, items.Select(i => new FileResult(i, output, FileOutcome.Converted)).ToArray());
         }
         catch (Exception ex)
         {
-            AppLog.Write($"압축 실패: {ex.Message}");
+            AppLog.Write($"{target.Label} 실패: {ex.Message}");
             return new BatchResult(target, items.Select(i => new FileResult(i, null, FileOutcome.Failed, ex.Message)).ToArray());
         }
         finally
@@ -120,7 +122,7 @@ internal sealed class ConversionService
         }
     }
 
-    static void TryDelete(string path)
+    internal static void TryDelete(string path)
     {
         try
         {

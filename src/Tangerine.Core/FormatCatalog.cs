@@ -24,6 +24,9 @@ public enum ConversionEngine
 
     /// <summary>Windows 기본 PDF 렌더러로 PDF 를 쪽마다 그림으로</summary>
     PdfPages,
+
+    /// <summary>끌어 온 PDF 를 모두 합쳐 PDF 하나를 만든다 (PDFsharp)</summary>
+    PdfMerge,
 }
 
 /// <param name="Id">형식 식별자. 원형 메뉴에서 고른 칸을 파일마다 다시 찾을 때 쓴다.</param>
@@ -97,6 +100,9 @@ public static class FormatCatalog
         new("png", "PNG", ".png", ConversionEngine.PdfPages, "쪽마다"),
     ];
 
+    /// <summary>PDF 만 2개 이상 끌어 왔을 때 메뉴 첫 칸에 나오는 합치기.</summary>
+    public static readonly TargetFormat PdfMerge = new("merge", "합치기", ".pdf", ConversionEngine.PdfMerge, "PDF 하나로");
+
     /// <summary>어떤 파일·폴더든 메뉴 마지막 칸에 나오는 압축.</summary>
     public static readonly TargetFormat Zip = new("zip", "ZIP", ".zip", ConversionEngine.Archive, "압축");
 
@@ -141,6 +147,7 @@ public static class FormatCatalog
     /// 모든 파일이 바뀔 수 있는 형식만 남기고, 모든 파일이 이미 그 형식이면 뺀다.
     /// (JPG 와 PNG 를 같이 끌어 와 JPG 를 고르면 PNG 만 바뀌고 JPG 는 건너뛴다.)
     /// 압축(ZIP)은 무엇을 끌어 오든 마지막 칸에 붙는다. 폴더가 섞이면 압축만 할 수 있다.
+    /// PDF 만 여러 개면 합치기가 첫 칸에 붙는다.
     /// </summary>
     public static IReadOnlyList<TargetFormat> MenuTargets(IEnumerable<string> paths)
     {
@@ -157,7 +164,10 @@ public static class FormatCatalog
             common = common.Where(t => ids.Contains(t.Id));
         }
 
-        return [.. common.Where(t => !files.All(f => IsSameFormat(f, t))), Zip];
+        var targets = common.Where(t => !files.All(f => IsSameFormat(f, t)));
+        return files.Count > 1 && files.All(f => NormalizeExtension(Path.GetExtension(f)) == ".pdf")
+            ? [PdfMerge, .. targets, Zip]
+            : [.. targets, Zip];
     }
 
     /// <summary>원형 메뉴에서 고른 형식을 이 파일에 맞는 변환 방법으로 다시 찾는다.</summary>

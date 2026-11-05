@@ -99,6 +99,10 @@ internal static class NativeMethods
     [return: MarshalAs(UnmanagedType.Bool)]
     public static extern bool DeleteObject(IntPtr hObject);
 
+    /// <summary>탐색기의 이름 정렬과 같은 비교 ("2장" 이 "10장" 보다 앞).</summary>
+    [DllImport("shlwapi.dll", CharSet = CharSet.Unicode)]
+    public static extern int StrCmpLogicalW(string a, string b);
+
     public const uint MONITOR_DEFAULTTONEAREST = 2;
     public const int MDT_EFFECTIVE_DPI = 0;
 
