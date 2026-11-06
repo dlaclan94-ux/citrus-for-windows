@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>탠저린 기능 안내</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* 레이아웃: 귤 조각 메뉴 그림이 있는 머리말, 그 아래 좁은 본문 칼럼에 표와 규칙을 차례로. 색은 탠저린 메뉴의 유리·열화상에서 가져옴 */
+:root {
+  --bg: #fbf8f4;
+  --surface: #ffffff;
+  --ink: #23201c;
+  --muted: #6b645b;
+  --line: #e8e1d6;
+  --peel: #ff8a3d;
+  --peel-deep: #c95a14;
+  --pith: #fff1dc;
+  --heat-core: #fff26a;
+  --heat-mid: #ffc49a;
+  --glass: rgba(255,255,255,.82);
+  --glass-edge: rgba(35,32,28,.12);
+  --font-display: "IBM Plex Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+  --font-body: "IBM Plex Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+  --font-mono: "IBM Plex Mono", "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17140f; --surface: #211d17; --ink: #f3ece2; --muted: #b3a998; --line: #3a332a;
+    --peel: #ff9a52; --peel-deep: #ffb27a; --pith: #3a2a17; --heat-core: #fff26a; --heat-mid: #ffc49a;
+    --glass: rgba(72,68,62,.85); --glass-edge: rgba(255,255,255,.14); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #17140f; --surface: #211d17; --ink: #f3ece2; --muted: #b3a998; --line: #3a332a;
+  --peel: #ff9a52; --peel-deep: #ffb27a; --pith: #3a2a17; --heat-core: #fff26a; --heat-mid: #ffc49a;
+  --glass: rgba(72,68,62,.85); --glass-edge: rgba(255,255,255,.14); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.7;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 40px 72px;
+}
+.page { max-width: 880px; margin: 0 auto; display: grid; gap: 56px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.3; }
+h1 { font-size: clamp(2rem, 5vw, 2.9rem); font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: 1.45rem; font-weight: 700; }
+h3 { font-size: 1.05rem; font-weight: 600; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+code, .file { font-family: var(--font-mono); font-size: .9em; background: var(--pith); color: var(--peel-deep); padding: 1px 6px; border-radius: 5px; white-space: nowrap; }
+kbd { font-family: var(--font-mono); font-size: .85em; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 6px; padding: 0 7px; background: var(--surface); }
+.eyebrow { font-size: .78rem; font-weight: 600; letter-spacing: .08em; color: var(--peel-deep); }
+
+/* 머리말 */
+.hero { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 32px; align-items: center; }
+.hero .lead { font-size: 1.12rem; color: var(--muted); max-width: 34em; margin-top: 14px; }
+.hero .meta { margin-top: 18px; font-size: .85rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px 16px; }
+.wheel { width: 100%; max-width: 260px; height: auto; aspect-ratio: 1; justify-self: center; }
+@media (max-width: 640px) { .hero { grid-template-columns: 1fr; } .wheel { max-width: 200px; } }
+
+section { display: grid; gap: 18px; }
+.section-head { display: grid; gap: 4px; }
+
+/* 쓰는 법: 실제 순서가 있는 세 단계 */
+.steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; list-style: none; margin: 0; padding: 0; counter-reset: step; }
+.steps li { counter-increment: step; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.steps li::before { content: counter(step); font-family: var(--font-mono); font-weight: 500; color: var(--peel-deep); font-size: .85rem; }
+@media (max-width: 640px) { .steps { grid-template-columns: 1fr; } }
+
+/* 표 */
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+table { width: 100%; border-collapse: collapse; font-size: .93rem; min-width: 560px; }
+th, td { text-align: left; vertical-align: top; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+tr:last-child td { border-bottom: 0; }
+th { font-family: var(--font-display); font-weight: 600; font-size: .8rem; letter-spacing: .04em; color: var(--muted); background: color-mix(in srgb, var(--pith) 45%, var(--surface)); }
+td:first-child { font-weight: 600; }
+.engine { color: var(--muted); font-size: .85rem; }
+
+/* 메뉴 조각 칩 */
+.slices { display: flex; flex-wrap: wrap; gap: 6px; }
+.slice { font-family: var(--font-mono); font-size: .8rem; padding: 2px 10px; border-radius: 999px; border: 1px solid var(--glass-edge); background: var(--glass); white-space: nowrap; }
+.slice.lead-slice { background: radial-gradient(circle at 50% 50%, var(--heat-core) 0 35%, var(--peel) 75%, var(--heat-mid)); color: #23201c; border-color: transparent; font-weight: 500; }
+
+/* 규칙 목록 */
+.rules { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.rule { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.rule ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
+.rule li { overflow-wrap: anywhere; }
+.rule .file { white-space: normal; overflow-wrap: anywhere; }
+@media (max-width: 640px) { .rules { grid-template-columns: 1fr; } }
+
+.note { border-left: 3px solid var(--peel); padding: 4px 0 4px 16px; color: var(--muted); }
+.later ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
+footer { font-size: .85rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 18px; }
+:focus-visible { outline: 2px solid var(--peel); outline-offset: 2px; }
+
+/* PDF 로 인쇄할 때: A4, 흰 바탕, 표 줄·카드가 쪽 사이에서 잘리지 않게 */
+@page { size: A4; margin: 14mm 12mm; }
+@media print {
+  body { background: #fff; padding: 0; font-size: 13px; }
+  .page { max-width: none; gap: 28px; }
+  .hero { grid-template-columns: minmax(0, 1fr) 180px; }
+  .wheel { max-width: 180px; }
+  table { min-width: 0; font-size: 12px; }
+  th, td { padding: 8px 12px; }
+  tr, .rule, .steps li { break-inside: avoid; }
+  /* grid 안에서는 쪽 나눔 설정이 먹지 않아, 인쇄할 때는 구역을 일반 흐름으로 */
+  .page, section { display: block; }
+  section { margin-top: 26px; }
+  section > * + * { margin-top: 14px; }
+  h2, .section-head { break-after: avoid; }
+  .table-wrap { overflow: visible; }
+}
+</style>
+
+</head>
+<body>
+<div class="page">
+  <header class="hero">
+    <div>
+      <div class="eyebrow">TANGERINE FOR WINDOWS</div>
+      <h1>탠저린 기능 안내</h1>
+      <p class="lead">탐색기에서 파일을 끌어오는 도중 <kbd>Shift</kbd> 를 누르면 커서 아래에 귤 조각 메뉴가 뜹니다. 원하는 조각 위에 놓으면 원본 옆에 새 파일이 생깁니다.</p>
+      <div class="meta"><span>제작 dlaclan</span><span>버전 1.0.0</span><span>Windows 10 (2004 이상) · 11, 64비트</span><span>모든 변환은 이 PC 안에서만</span></div>
+    </div>
+    <img class="wheel" src="orange.png" width="480" height="480" alt="잎이 달린 오렌지 그림">
+  </header>
+
+  <section aria-labelledby="how">
+    <div class="section-head"><h2 id="how">쓰는 법</h2></div>
+    <ol class="steps">
+      <li><h3>파일을 끌어온다</h3><p class="muted">탐색기나 바탕화면에서 파일·폴더를 마우스로 잡아 끌어옵니다. 여러 개도 됩니다.</p></li>
+      <li><h3><kbd>Shift</kbd> 를 누른다</h3><p class="muted">끌어오는 도중에 누르면 커서 아래에 귤 조각 메뉴가 뜹니다.</p></li>
+      <li><h3>조각 위에 놓는다</h3><p class="muted">마우스가 올라간 조각이 열화상 색으로 바뀝니다. 가운데·바깥에 놓거나 <kbd>Esc</kbd> 면 취소.</p></li>
+    </ol>
+  </section>
+
+  <section aria-labelledby="menu">
+    <div class="section-head">
+      <h2 id="menu">무엇을 끌어오면 어떤 조각이 나오나</h2>
+      <p class="muted">끌어온 파일이 모두 바뀔 수 있는 형식만 나옵니다. 마지막 두 조각은 늘 ZIP → 경로 복사입니다.</p>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>끌어온 것</th><th>메뉴에 나오는 조각</th></tr></thead>
+        <tbody>
+          <tr><td>사진 1개 (PNG·SVG 등)</td><td><div class="slices"><span class="slice">JPG</span><span class="slice">WEBP</span><span class="slice">AVIF</span><span class="slice">GIF</span><span class="slice">BMP</span><span class="slice">TIFF</span><span class="slice">ICO</span><span class="slice">PDF</span><span class="slice">ZIP</span><span class="slice">경로</span></div></td></tr>
+          <tr><td>영상</td><td><div class="slices"><span class="slice">MP4</span><span class="slice">MOV</span><span class="slice">MKV</span><span class="slice">WEBM</span><span class="slice">AVI</span><span class="slice">GIF 움짤</span><span class="slice">MP3 소리만</span><span class="slice">WAV 소리만</span><span class="slice">M4A 소리만</span><span class="slice">ZIP</span><span class="slice">경로</span></div></td></tr>
+          <tr><td>한글·Word·TXT</td><td><div class="slices"><span class="slice">PDF</span><span class="slice">ZIP</span><span class="slice">경로</span></div></td></tr>
+          <tr><td>엑셀 (XLS·XLSX)</td><td><div class="slices"><span class="slice">PDF</span><span class="slice">CSV 시트마다</span><span class="slice">ZIP</span><span class="slice">경로</span></div></td></tr>
+          <tr><td>CSV</td><td><div class="slices"><span class="slice">XLSX</span><span class="slice">ZIP</span><span class="slice">경로</span></div></td></tr>
+          <tr><td>발표 (PPT·PPTX)</td><td><div class="slices"><span class="slice">PDF</span><span class="slice">JPG 장마다</span><span class="slice">PNG 장마다</span><span class="slice">ZIP</span><span class="slice">경로</span></div></td></tr>
+          <tr><td>자막 (SRT·VTT)</td><td><div class="slices"><span class="slice">VTT 또는 SRT</span><span class="slice">TXT 대사만</span><span class="slice">ZIP</span><span class="slice">경로</span></div></td></tr>
+          <tr><td>PDF 1개</td><td><div class="slices"><span class="slice lead-slice">나누기</span><span class="slice">JPG 쪽마다</span><span class="slice">PNG 쪽마다</span><span class="slice">ZIP</span><span class="slice">경로</span></div></td></tr>
+          <tr><td>PDF 2개 이상</td><td><div class="slices"><span class="slice lead-slice">합치기</span><span class="slice">나누기</span><span class="slice">JPG 쪽마다</span><span class="slice">PNG 쪽마다</span><span class="slice">ZIP</span><span class="slice">경로</span></div></td></tr>
+          <tr><td>폴더, 또는 종류가 섞인 파일</td><td><div class="slices"><span class="slice">ZIP</span><span class="slice">경로</span></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="formats">
+    <div class="section-head"><h2 id="formats">바꿀 수 있는 형식</h2></div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>원본</th><th>바꿀 수 있는 형식</th><th>엔진</th></tr></thead>
+        <tbody>
+          <tr><td>이미지<br><span class="engine">JPG·JPEG, PNG, WEBP, HEIC, AVIF, GIF, BMP, TIFF·TIF, ICO, SVG</span></td><td>JPG, PNG, WEBP, AVIF, GIF, BMP, TIFF, ICO(여러 크기), PDF</td><td class="engine">Magick.NET</td></tr>
+          <tr><td>GIF (위에 더해)</td><td>MP4, WEBM</td><td class="engine">ffmpeg</td></tr>
+          <tr><td>영상<br><span class="engine">MP4, MOV, M4V, MKV, AVI, WEBM, WMV, FLV, MPG, 3GP, TS, MTS·M2TS</span></td><td>MP4, MOV, MKV, WEBM, AVI, GIF(움짤), MP3·WAV·M4A(소리만)</td><td class="engine">ffmpeg</td></tr>
+          <tr><td>오디오<br><span class="engine">MP3, WAV, M4A, AAC, FLAC, OGG, OPUS, WMA, AIFF</span></td><td>MP3, WAV, M4A, FLAC, OGG, OPUS, AIFF</td><td class="engine">ffmpeg</td></tr>
+          <tr><td>한글 문서<br><span class="engine">HWP, HWPX</span></td><td>PDF</td><td class="engine">설치된 한글</td></tr>
+          <tr><td>Word·메모장<br><span class="engine">DOC, DOCX, TXT</span></td><td>PDF</td><td class="engine">설치된 Word</td></tr>
+          <tr><td>엑셀<br><span class="engine">XLS, XLSX</span></td><td>PDF, CSV (시트마다, UTF-8)</td><td class="engine">설치된 Excel</td></tr>
+          <tr><td>CSV</td><td>XLSX</td><td class="engine">설치된 Excel</td></tr>
+          <tr><td>발표<br><span class="engine">PPT, PPTX</span></td><td>PDF, JPG·PNG (장마다 300dpi)</td><td class="engine">설치된 PowerPoint</td></tr>
+          <tr><td>자막<br><span class="engine">SRT, VTT</span></td><td>SRT, VTT, TXT (대사만)</td><td class="engine">탠저린 자체</td></tr>
+          <tr><td>PDF</td><td>나누기 (쪽마다 PDF), JPG·PNG (쪽마다 300dpi)</td><td class="engine">PDFsharp / Windows PDF 렌더러</td></tr>
+          <tr><td>PDF 여러 개</td><td>합치기 (PDF 하나로)</td><td class="engine">PDFsharp</td></tr>
+          <tr><td>무엇이든</td><td>ZIP (끌어온 것을 모두 묶어 하나로)</td><td class="engine">반디집, 없으면 Windows 기본 ZIP</td></tr>
+          <tr><td>무엇이든</td><td>경로 복사 (전체 경로를 한 줄에 하나씩 클립보드로)</td><td class="engine">탠저린 자체</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="results">
+    <div class="section-head">
+      <h2 id="results">결과 파일은 이렇게 생깁니다</h2>
+      <p class="muted">늘 원본과 같은 폴더에 새로 만들고, 원본은 건드리지 않습니다. 같은 이름이 있으면 <span class="file">사진 (1).jpg</span> 처럼 번호를 붙입니다.</p>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>작업</th><th>원본</th><th>결과 이름</th></tr></thead>
+        <tbody>
+          <tr><td>형식 바꾸기</td><td><span class="file">사진.png</span></td><td><span class="file">사진.jpg</span></td></tr>
+          <tr><td>PDF → 그림</td><td><span class="file">도면.pdf</span> (3쪽)</td><td><span class="file">도면 1쪽.jpg</span> <span class="file">도면 2쪽.jpg</span> <span class="file">도면 3쪽.jpg</span><br><span class="engine">1쪽짜리는 <span class="file">도면.jpg</span></span></td></tr>
+          <tr><td>PDF 나누기</td><td><span class="file">보고서.pdf</span> (3쪽)</td><td><span class="file">보고서 1쪽.pdf</span> … <span class="file">보고서 3쪽.pdf</span><br><span class="engine">1쪽짜리는 건너뜀</span></td></tr>
+          <tr><td>PDF 합치기</td><td><span class="file">표지.pdf</span> → <span class="file">본문.pdf</span> → <span class="file">부록.pdf</span> 순서로 선택</td><td><span class="file">표지 외 2개.pdf</span><br><span class="engine">선택한 순서대로 합침. 처음 고른 파일을 잡고 끌어오기</span></td></tr>
+          <tr><td>발표 → 그림</td><td><span class="file">발표.pptx</span> (3장)</td><td><span class="file">발표 1장.jpg</span> … <span class="file">발표 3장.jpg</span></td></tr>
+          <tr><td>엑셀 → CSV</td><td><span class="file">매출.xlsx</span> (시트 2개)</td><td><span class="file">매출 1월 매출.csv</span> <span class="file">매출 요약.csv</span><br><span class="engine">시트가 하나면 <span class="file">매출.csv</span></span></td></tr>
+          <tr><td>압축</td><td>파일 1개 / 여러 개</td><td><span class="file">그이름.zip</span> / <span class="file">들어있던폴더.zip</span></td></tr>
+          <tr><td>경로 복사</td><td>파일·폴더 여러 개</td><td>파일을 만들지 않고 클립보드에 경로를 한 줄에 하나씩</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="details">
+    <div class="section-head"><h2 id="details">알아서 처리하는 것</h2></div>
+    <div class="rules">
+      <div class="rule"><h3>이미지</h3><ul>
+        <li>투명 PNG → JPG 는 투명 부분을 흰 바탕으로</li>
+        <li>폰 사진의 방향 정보(EXIF)대로 바로 세움</li>
+        <li>움직이는 GIF·WEBP 는 움직임 유지</li>
+        <li>ICO 는 256px 까지 여러 크기를 한 파일에</li>
+      </ul></div>
+      <div class="rule"><h3>영상·오디오</h3><ul>
+        <li>세로로 찍은 폰 영상은 세로 그대로</li>
+        <li>가로·세로가 홀수인 영상도 변환</li>
+        <li>소리 없는 영상에서 "소리만"을 고르면 이유를 알려 주고 멈춤</li>
+        <li>ffmpeg 는 낮은 우선순위로 돌려 PC 가 버벅이지 않게</li>
+      </ul></div>
+      <div class="rule"><h3>문서 → PDF</h3><ul>
+        <li>한글·Office 는 보이지 않게 띄우고 매크로는 실행하지 않음</li>
+        <li>암호 걸린 문서는 암호 창 없이 바로 실패 처리</li>
+        <li>한글의 "파일 접근 허용" 확인 창은 한컴 공식 보안 모듈로 건너뜀</li>
+        <li>사람이 열어 둔 한글·PowerPoint 문서는 건드리지 않음</li>
+        <li>Excel 은 모든 시트, TXT 는 UTF-8·ANSI·UTF-16 을 가려 읽음</li>
+        <li>CSV 는 UTF-8 로 써서 한글이 깨지지 않고, CSV → XLSX 는 UTF-8·ANSI 를 가려 엶</li>
+      </ul></div>
+      <div class="rule"><h3>자막·SVG</h3><ul>
+        <li>자막은 UTF-8·ANSI 를 가려 읽고, TXT 는 꼬리표를 지운 대사만</li>
+        <li>SVG 는 300dpi 로 선명하게, PNG 는 투명 바탕·JPG 는 흰 바탕</li>
+      </ul></div>
+      <div class="rule"><h3>진행률·취소</h3><ul>
+        <li>변환하는 동안 알림 영역 아이콘이 진행된 만큼 시계 방향으로 차오름</li>
+        <li>마우스를 올리면 <span class="file">변환 중 37%</span> 처럼 보임</li>
+        <li>오른쪽 클릭 "변환 취소": 영상·오디오·PDF 는 바로 멈추고 만들던 파일을 지움, Office 문서는 지금 파일까지 마침</li>
+      </ul></div>
+      <div class="rule"><h3>PDF</h3><ul>
+        <li>합치기·나누기는 쪽을 그림으로 바꾸지 않아 글자 선택과 품질 유지</li>
+        <li>그림 변환은 300dpi, 흰 바탕 (A4 = 2481×3509px)</li>
+        <li>큰 도면은 긴 변 10,000px 까지 줄임</li>
+        <li>손상·암호 PDF 는 어느 파일인지 알려 주고 실패, 빈 파일을 남기지 않음</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="tray">
+    <div class="section-head"><h2 id="tray">알림 영역과 설치</h2></div>
+    <div class="rules">
+      <div class="rule"><h3>알림 영역 아이콘 (오른쪽 클릭)</h3><ul>
+        <li>변환 취소 (변환하는 동안에만)</li>
+        <li>Shift 끌기로 변환 켜기·끄기</li>
+        <li>탐색기·바탕화면에서만 작동</li>
+        <li>Windows 시작 시 실행</li>
+        <li>사용 방법 · 기록 폴더 열기 · 종료</li>
+      </ul></div>
+      <div class="rule"><h3>알림</h3><ul>
+        <li>끝나면 Windows 알림. 누르면 탐색기에서 결과 파일을 보여 줌</li>
+        <li>실패하면 이유를 한국어로 알려 줌</li>
+        <li>기록: <span class="file">%LOCALAPPDATA%\Tangerine\tangerine.log</span></li>
+      </ul></div>
+      <div class="rule"><h3>설치</h3><ul>
+        <li><span class="file">Tangerine-Setup-v1.0.0.exe</span> 를 실행하면 내 계정에 설치 (관리자 권한 필요 없음)</li>
+        <li>위치: <span class="file">%LOCALAPPDATA%\Programs\Tangerine</span></li>
+        <li>바탕화면 바로가기, Windows 시작 시 자동 실행은 설치할 때 고름</li>
+        <li>시작 메뉴에 <b>탠저린</b>, <b>탠저린 설명서</b></li>
+        <li>제거: Windows 설정 → 앱 → 설치된 앱 → Tangerine</li>
+      </ul></div>
+      <div class="rule"><h3>메뉴 모양</h3><ul>
+        <li>귤 단면: 껍질 테두리 안에 형식마다 조각 하나</li>
+        <li>뒤 화면이 흐리게 비치는 유리, 고른 조각만 열화상 색</li>
+        <li>라이트·다크 모드, 투명 효과·애니메이션 끄기, 고대비를 따름</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="limits" class="later">
+    <div class="section-head"><h2 id="limits">한계와 아직 없는 기능</h2></div>
+    <p class="note">관리자 권한으로 실행한 프로그램에서 끌어 온 파일은 Windows 보안 정책 때문에 받을 수 없습니다. 반디집으로 만든 ZIP 은 파일 이름이 CP949 라 맥에서 풀면 한글 이름이 깨질 수 있습니다.</p>
+    <ul>
+      <li><kbd>Ctrl</kbd> + 끌기 파일 도구: 용량 압축, 자르기, 영상 자르기·나누기, PDF 쪽 골라 빼기, 메타데이터 삭제</li>
+      <li><kbd>Alt</kbd> + 끌기 파일 동작: 복사, 이동, 경로 복사, 터미널 열기</li>
+      <li>한글·Office 가 없는 PC 를 위한 문서 변환, EPUB</li>
+      <li>탐색기 오른쪽 클릭 "변환" 메뉴</li>
+      <li>PDF 합치기의 책갈피(목차) 옮기기</li>
+    </ul>
+  </section>
+
+  <section aria-labelledby="install-notes">
+    <div class="section-head"><h2 id="install-notes">처음 설치할 때</h2></div>
+    <div class="rules">
+      <div class="rule"><h3>"Windows 의 PC 보호" 창이 뜨면</h3><ul>
+        <li>서명하지 않은 개인 프로그램이라 처음 실행할 때 뜰 수 있습니다</li>
+        <li><b>추가 정보</b> → <b>실행</b> 을 누르면 설치가 이어집니다</li>
+      </ul></div>
+      <div class="rule"><h3>필요한 프로그램</h3><ul>
+        <li>사진·영상·오디오·PDF·자막·압축: 따로 필요 없음 (ffmpeg 포함)</li>
+        <li>문서 → PDF: 한글(HWP·HWPX), Word·Excel·PowerPoint 가 설치되어 있어야 함</li>
+        <li>압축은 반디집이 있으면 반디집으로, 없으면 Windows 기본 ZIP 으로</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="credits">
+    <div class="section-head"><h2 id="credits">만든 사람과 참고</h2></div>
+    <div class="rules">
+      <div class="rule"><h3>제작</h3><ul>
+        <li><b>dlaclan</b></li>
+        <li>저장소: <span class="file">github.com/dlaclan94-ux/tangerine-for-windows</span></li>
+      </ul></div>
+      <div class="rule"><h3>참고한 앱</h3><ul>
+        <li>macOS 용 <b>Tangerine</b> (Leap Studio, tangerineformac.com)</li>
+        <li>파일을 끌어오며 키를 눌러 원형 메뉴로 바꾸는 방식을 참고해, Windows 용으로 새로 만든 개인 프로젝트입니다. 원본 앱·Leap Studio 와는 관계가 없습니다.</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <footer>탠저린 for Windows 1.0.0 · 제작 dlaclan · 맥용 Tangerine(Leap Studio)을 참고해 만든 개인 프로젝트 · 사용한 오픈소스: ffmpeg(GPL), Magick.NET(Apache-2.0), PDFsharp(MIT)</footer>
+</div>
+
+
+</body>
+</html>

@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - "v*.*.*"
+  # 태그 없이 손으로 돌리면 설치 파일까지만 만들어 Actions 의 Artifacts 에 둔다 (Releases 에는 올리지 않음)
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -18,25 +20,54 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
+      - name: Version
+        run: |
+          $v = if ($env:GITHUB_REF_TYPE -eq 'tag') { $env:GITHUB_REF_NAME.TrimStart('v') } else { '0.0.0' }
+          "VERSION=$v" >> $env:GITHUB_ENV
+
       - name: Test
         run: dotnet test tests/Tangerine.Core.Tests -c Release
 
       - name: Publish single-file exe
         run: >
           dotnet publish src/Tangerine/Tangerine.csproj -c Release -r win-x64 --self-contained true
-          -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
-          -p:Version=$("${{ github.ref_name }}".TrimStart('v'))
+          -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=None
+          -p:Version=$env:VERSION
           -o out/Tangerine
 
       - name: Bundle ffmpeg
         run: ./scripts/fetch-ffmpeg.ps1 -Destination out/Tangerine/tools
 
-      - name: Zip
+      - name: Installer
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { choco install innosetup -y --no-progress }
+          & $iscc "/DAppVersion=$env:VERSION" installer\Tangerine.iss
+          if ($LASTEXITCODE -ne 0) { throw "ISCC 실패 ($LASTEXITCODE)" }
+
+      - name: Zip and guide
         run: |
           Copy-Item README.md out/Tangerine/
-          Compress-Archive -Path out/Tangerine/* -DestinationPath "Tangerine-${{ github.ref_name }}-win-x64.zip"
+          Copy-Item docs/tangerine-guide.pdf out/Tangerine/
+          Compress-Archive -Path out/Tangerine/* -DestinationPath "out/Tangerine-v$env:VERSION-win-x64.zip"
+          Copy-Item docs/tangerine-guide.pdf "out/Tangerine-Guide-v$env:VERSION.pdf"
+
+      - name: Keep build (manual run)
+        if: github.ref_type != 'tag'
+        uses: actions/upload-artifact@v4
+        with:
+          name: tangerine-test-build
+          path: |
+            out/Tangerine-Setup-v*.exe
+            out/Tangerine-v*-win-x64.zip
+            out/Tangerine-Guide-v*.pdf
 
       - uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'
         with:
-          files: Tangerine-${{ github.ref_name }}-win-x64.zip
-          generate_release_notes: true
+          name: 탠저린 ${{ github.ref_name }}
+          body_path: installer/release-notes.md
+          files: |
+            out/Tangerine-Setup-v*.exe
+            out/Tangerine-v*-win-x64.zip
+            out/Tangerine-Guide-v*.pdf

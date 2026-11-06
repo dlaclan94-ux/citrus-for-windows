@@ -1,0 +1,19 @@
+탐색기에서 파일을 끌어오는 도중 `Shift` 를 누르면 귤 조각 메뉴가 뜨고, 원하는 조각 위에 놓으면 원본 옆에 새 파일이 생기는 Windows 용 파일 변환기입니다.
+
+## 내려받기
+
+| 파일 | 내용 |
+|---|---|
+| `Tangerine-Setup-v*.exe` | **설치 파일 (추천)**. 내 계정에 설치해 관리자 권한이 필요 없습니다. 바탕화면 바로가기·자동 실행은 설치할 때 고릅니다. |
+| `Tangerine-v*-win-x64.zip` | 설치 없이 쓰는 묶음. 원하는 폴더에 풀고 `Tangerine.exe` 를 실행합니다. |
+| `Tangerine-Guide-v*.pdf` | 설명서 (어떤 파일이 무엇으로 바뀌는지, 결과 파일 이름 규칙, 설치 안내) |
+
+- Windows 10 (2004 이상) / 11, 64비트
+- 서명하지 않은 개인 프로그램이라 "Windows 의 PC 보호" 창이 뜨면 **추가 정보 → 실행** 을 누르세요.
+- 문서 → PDF 는 한글·Word·Excel·PowerPoint 가 설치되어 있어야 합니다. 나머지(사진·영상·오디오·PDF·자막·압축)는 따로 필요 없습니다.
+
+## 만든 사람
+
+- 제작: **dlaclan**
+- macOS 용 [Tangerine](https://tangerineformac.com) (Leap Studio) 의 끌어서 바꾸는 방식을 참고해 Windows 용으로 새로 만든 개인 프로젝트입니다. 원본 앱·Leap Studio 와는 관계가 없습니다.
+- 사용한 오픈소스: ffmpeg (GPL, `tools\FFMPEG-LICENSE.txt`), Magick.NET (Apache-2.0), PDFsharp (MIT)

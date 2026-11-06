@@ -69,11 +69,16 @@
 
 ## 설치
 
-[Releases](../../releases) 에서 `Tangerine-v*-win-x64.zip` 을 받아 원하는 폴더에 풀고 `Tangerine.exe` 를 실행합니다.
-.NET 설치는 필요 없습니다. 압축 파일 안의 `tools\ffmpeg.exe` 는 영상·오디오 변환에 쓰므로 같이 두세요.
+[Releases](../../releases) 에서 내려받습니다. 설명서는 `Tangerine-Guide-v*.pdf` (원본: [docs/guide.html](docs/guide.html)) 입니다.
 
+- **설치 파일 `Tangerine-Setup-v*.exe` (추천)**: 내 계정(`%LOCALAPPDATA%\Programs\Tangerine`)에 설치해 관리자 권한이 필요 없습니다.
+  바탕화면 바로가기와 로그인 시 자동 실행은 설치할 때 고르고, 시작 메뉴에 탠저린·탠저린 설명서가 생깁니다. 제거는 Windows 설정 → 앱.
+- **묶음 `Tangerine-v*-win-x64.zip`**: 원하는 폴더에 풀고 `Tangerine.exe` 를 실행합니다. `tools\ffmpeg.exe` 는 영상·오디오 변환에 쓰므로 같이 두세요.
+- .NET 설치는 필요 없습니다. 서명하지 않은 프로그램이라 "Windows 의 PC 보호" 창이 뜨면 **추가 정보 → 실행** 을 누르세요.
 - Windows 10 (2004 이상) / 11, 64비트
 - 관리자 권한으로 실행한 프로그램에서 끌어 온 파일은 Windows 보안 정책 때문에 받을 수 없습니다.
+
+제작: **dlaclan**. 맥용 [Tangerine](https://tangerineformac.com)(Leap Studio)의 끌어서 바꾸는 방식을 참고해 Windows 용으로 새로 만든 개인 프로젝트이며, 원본 앱과는 관계가 없습니다.
 
 ## 개발
 
@@ -82,11 +87,13 @@ dotnet test tests/Tangerine.Core.Tests     # 형식 목록·파일 이름·ffmpe
 .\scripts\fetch-ffmpeg.ps1                  # src\Tangerine\tools\ffmpeg.exe 받기 (처음 한 번)
 dotnet run --project src/Tangerine          # 실행
 .\scripts\install-local.ps1                 # 이 PC 에 설치: %LOCALAPPDATA%\Programs\Tangerine, 로그인 시 자동 실행, 바탕화면·시작 메뉴 바로가기
+.\scripts\build-guide.ps1                   # docs\guide.html → docs\tangerine-guide.pdf (Edge 필요)
 ```
 
 - .NET 10 SDK 필요. 맥에서도 `dotnet build src/Tangerine/Tangerine.csproj` 로 컴파일까지는 확인할 수 있습니다 (실행은 Windows 에서만).
 - `main` 에 올리면 GitHub Actions 가 Windows 에서 테스트·빌드합니다.
-- `v0.1.0` 처럼 태그를 올리면 단일 exe + ffmpeg 를 묶은 zip 을 Releases 에 올립니다.
+- `v1.0.0` 처럼 태그를 올리면 설치 파일(Inno Setup, `installer/Tangerine.iss`)·zip·설명서 PDF 를 Releases 에 올립니다.
+  Actions 에서 Release 를 손으로 돌리면 Releases 에 올리지 않고 만든 파일만 Artifacts 에 남겨 시험할 수 있습니다.
 
 ### 구조
 
