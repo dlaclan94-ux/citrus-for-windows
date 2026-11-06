@@ -12,7 +12,7 @@ using Forms = System.Windows.Forms;
 
 namespace Tangerine;
 
-/// <summary>창 없이 알림 영역에 상주한다. 탐색기에서 파일을 끄는 도중 Shift 를 누르면 원형 메뉴를 띄운다.</summary>
+/// <summary>창 없이 알림 영역에 상주한다. 탐색기에서 파일을 끌어오는 도중 Shift 를 누르면 원형 메뉴를 띄운다.</summary>
 public partial class App : Application
 {
     Mutex? _singleInstance;
@@ -56,6 +56,9 @@ public partial class App : Application
                 _watcher.ExplorerOnly = on;
         };
         _tray.ExitRequested += () => Shutdown();
+        _tray.CancelRequested += _converter.CancelAll;
+        // 진행률은 변환 스레드에서 오므로 화면 스레드로 넘겨 아이콘을 그린다
+        _converter.ProgressChanged += progress => Dispatcher.BeginInvoke(() => _tray?.SetProgress(progress));
 
         try
         {

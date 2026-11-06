@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using ImageMagick;
 using Tangerine.Core;
@@ -21,7 +22,8 @@ internal static class PdfPages
     const double MaxSide = 10000;  // A0 같은 큰 도면도 긴 변이 이 픽셀을 넘지 않게
 
     /// <param name="extension">".jpg" 또는 ".png"</param>
-    public static async Task<IReadOnlyList<string>> ConvertAsync(string source, string extension)
+    /// <param name="progress">쪽을 하나 마칠 때마다 0~1</param>
+    public static async Task<IReadOnlyList<string>> ConvertAsync(string source, string extension, CancellationToken cancel, Action<double>? progress = null)
     {
         PdfDocument pdf;
         try
@@ -41,13 +43,10 @@ internal static class PdfPages
         var outputs = new List<string>();
         try
         {
-            var dir = Path.GetDirectoryName(Path.GetFullPath(source))!;
-            var name = Path.GetFileNameWithoutExtension(source);
             for (uint i = 0; i < pdf.PageCount; i++)
             {
-                // 쪽 이름으로 자리를 잡는다 (같은 이름이 있으면 OutputPaths 가 (1) 을 붙인다)
-                var slot = pdf.PageCount == 1 ? source : Path.Combine(dir, $"{name} {i + 1}쪽.pdf");
-                var output = OutputPaths.Reserve(slot, extension);
+                cancel.ThrowIfCancellationRequested();
+                var output = OutputPaths.Reserve(PageSlot(source, (int)i + 1, (int)pdf.PageCount), extension);
                 outputs.Add(output);
 
                 using var page = pdf.GetPage(i);
@@ -68,6 +67,7 @@ internal static class PdfPages
                     image.Quality = 90;
                     image.Write(output, MagickFormat.Jpeg);
                 }
+                progress?.Invoke((i + 1.0) / pdf.PageCount);
             }
         }
         catch
@@ -79,17 +79,14 @@ internal static class PdfPages
         return outputs;
     }
 
-    static void TryDelete(string path)
-    {
-        try
-        {
-            File.Delete(path);
-        }
-        catch (IOException)
-        {
-        }
-        catch (UnauthorizedAccessException)
-        {
-        }
-    }
+    /// <summary>
+    /// 쪽마다 만드는 파일의 이름 자리: 한 쪽이면 원본 이름 그대로, 여러 쪽이면 "문서 3쪽" (슬라이드는 "발표 3장").
+    /// OutputPaths.Reserve 에 넘기면 확장자를 바꾸고, 같은 이름이 있으면 (1) 을 붙인다.
+    /// </summary>
+    internal static string PageSlot(string source, int page, int pageCount, string unit = "쪽") =>
+        pageCount == 1
+            ? source
+            : Path.Combine(Path.GetDirectoryName(Path.GetFullPath(source))!, $"{Path.GetFileNameWithoutExtension(source)} {page}{unit}.pdf");
+
+    static void TryDelete(string path) => ConversionService.TryDelete(path);
 }

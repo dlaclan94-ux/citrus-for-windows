@@ -16,11 +16,17 @@ internal sealed class TrayIcon : IDisposable
     readonly Forms.ToolStripMenuItem _enabledItem;
     readonly Forms.ToolStripMenuItem _explorerOnlyItem;
     readonly Forms.ToolStripMenuItem _startupItem;
+    readonly Forms.ToolStripMenuItem _cancelItem;
+    readonly Forms.ToolStripSeparator _cancelSeparator = new() { Visible = false };
+    Drawing.Icon? _progressIcon;
+    IntPtr _progressHandle;
+    int _percent = -1;
     string? _lastOutput;
     int _busy;
 
     public event Action<bool>? EnabledChanged;
     public event Action<bool>? ExplorerOnlyChanged;
+    public event Action? CancelRequested;
     public event Action? ExitRequested;
 
     public TrayIcon(AppSettings settings)
@@ -53,7 +59,12 @@ internal sealed class TrayIcon : IDisposable
             }
         };
 
+        // 변환하는 동안에만 보인다
+        _cancelItem = new Forms.ToolStripMenuItem("변환 취소", null, (_, _) => CancelRequested?.Invoke()) { Visible = false };
+
         var menu = new Forms.ContextMenuStrip();
+        menu.Items.Add(_cancelItem);
+        menu.Items.Add(_cancelSeparator);
         menu.Items.Add(_enabledItem);
         menu.Items.Add(_explorerOnlyItem);
         menu.Items.Add(_startupItem);
@@ -80,7 +91,7 @@ internal sealed class TrayIcon : IDisposable
 
     public void ShowHelp() => Notify(
         "Tangerine 사용 방법",
-        "탐색기에서 파일을 끄는 도중 Shift 를 누르면 원형 메뉴가 뜹니다. 원하는 형식 위에 놓으면 원본 옆에 새 파일이 생깁니다.");
+        "탐색기에서 파일을 끌어오는 도중 Shift 를 누르면 원형 메뉴가 뜹니다. 원하는 형식 위에 놓으면 원본 옆에 새 파일이 생깁니다.");
 
     public void BeginWork(int files)
     {
@@ -92,6 +103,23 @@ internal sealed class TrayIcon : IDisposable
     {
         _busy = Math.Max(0, _busy - result.Files.Count);
         UpdateText();
+
+        if (result.Target.Engine == Core.ConversionEngine.CopyPath)
+        {
+            Notify(
+                result.Failed > 0 ? "경로 복사 실패" : "경로 복사",
+                result.Failed > 0 ? result.Files[0].Error ?? ""
+                    : result.Files.Count == 1 ? result.Files[0].Source
+                    : $"경로 {result.Files.Count}개를 복사했습니다.",
+                result.Failed > 0 ? Forms.ToolTipIcon.Warning : Forms.ToolTipIcon.Info);
+            return;
+        }
+
+        if (result.Canceled == result.Files.Count)
+        {
+            Notify("변환 취소", $"{result.Files.Count}개 변환을 취소했습니다.");
+            return;
+        }
 
         if (result.Target.Engine is Core.ConversionEngine.Archive or Core.ConversionEngine.PdfMerge)
         {
@@ -111,9 +139,17 @@ internal sealed class TrayIcon : IDisposable
         }
 
         var label = result.Target.Label;
-        var text = result.Converted > 0 ? $"{label} 파일 {result.Made}개를 만들었습니다." : $"{label} 파일을 만들지 못했습니다.";
+        var split = result.Target.Engine == Core.ConversionEngine.PdfSplit;
+        var text = result.Converted == 0 ? (split ? (result.Failed > 0 ? "PDF 를 나누지 못했습니다." : "") : $"{label} 파일을 만들지 못했습니다.")
+            : split ? $"PDF {result.Made}개로 나눴습니다."
+            : $"{label} 파일 {result.Made}개를 만들었습니다.";
         if (result.Skipped > 0)
-            text += $" 이미 {label} 이거나 바꿀 수 없는 {result.Skipped}개는 건너뛰었습니다.";
+            text += split
+                ? $" 1쪽짜리라 나눌 것이 없는 {result.Skipped}개는 건너뛰었습니다."
+                : $" 이미 {label} 이거나 바꿀 수 없는 {result.Skipped}개는 건너뛰었습니다.";
+        if (result.Canceled > 0)
+            text += $" {result.Canceled}개는 취소했습니다.";
+        text = text.Trim();
         if (result.Failed > 0)
         {
             var reason = result.Files.First(f => f.Outcome == FileOutcome.Failed).Error;
@@ -136,17 +172,63 @@ internal sealed class TrayIcon : IDisposable
         _icon.ShowBalloonTip(4000, title, text, icon);
     }
 
+    /// <summary>
+    /// 진행률을 아이콘에 보여 준다: 아직 남은 부분을 어둡게 덮어, 진행된 만큼 귤이 시계 방향으로 밝게 차오른다.
+    /// null 이면 원래 아이콘. 1% 단위로만 다시 그린다.
+    /// </summary>
+    public void SetProgress(double? progress)
+    {
+        var percent = progress is { } p ? (int)Math.Floor(Math.Clamp(p, 0, 1) * 100) : -1;
+        if (percent == _percent)
+            return;
+        _percent = percent;
+
+        var oldIcon = _progressIcon;
+        var oldHandle = _progressHandle;
+        if (percent < 0)
+        {
+            _icon.Icon = _image;
+            _progressIcon = null;
+            _progressHandle = IntPtr.Zero;
+        }
+        else
+        {
+            using var bitmap = _image.ToBitmap();
+            using (var g = Drawing.Graphics.FromImage(bitmap))
+            using (var shade = new Drawing.SolidBrush(Drawing.Color.FromArgb(160, 25, 25, 25)))
+            {
+                g.SmoothingMode = Drawing.Drawing2D.SmoothingMode.AntiAlias;
+                var done = 360f * percent / 100;
+                if (done < 360)
+                    g.FillPie(shade, 0, 0, bitmap.Width - 1, bitmap.Height - 1, -90 + done, 360 - done);
+            }
+            _progressHandle = bitmap.GetHicon();
+            _progressIcon = Drawing.Icon.FromHandle(_progressHandle);
+            _icon.Icon = _progressIcon;
+        }
+        oldIcon?.Dispose();
+        if (oldHandle != IntPtr.Zero)
+            Interop.NativeMethods.DestroyIcon(oldHandle);
+        UpdateText();
+    }
+
     public void Dispose()
     {
         _icon.Visible = false;
         _icon.Dispose();
         _image.Dispose();
+        _progressIcon?.Dispose();
+        if (_progressHandle != IntPtr.Zero)
+            Interop.NativeMethods.DestroyIcon(_progressHandle);
     }
 
     void UpdateText()
     {
-        var text = _busy > 0 ? $"Tangerine — 변환 중 {_busy}개" : _enabledItem.Checked ? "Tangerine — 대기 중" : "Tangerine — 꺼짐";
+        var text = _busy > 0
+            ? _percent >= 0 ? $"Tangerine — 변환 중 {_percent}% ({_busy}개)" : $"Tangerine — 변환 중 {_busy}개"
+            : _enabledItem.Checked ? "Tangerine — 대기 중" : "Tangerine — 꺼짐";
         _icon.Text = text;
+        _cancelItem.Visible = _cancelSeparator.Visible = _busy > 0;
     }
 
     static void RevealInExplorer(string path) =>

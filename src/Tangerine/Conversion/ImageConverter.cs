@@ -9,11 +9,15 @@ internal static class ImageConverter
     public static void Convert(string source, string output, string targetId)
     {
         var format = FormatOf(targetId);
+        // SVG 는 크기가 없는 그림이라 300dpi 로 선명하게 그리고, 바탕은 투명하게 둔다
+        var settings = source.EndsWith(".svg", StringComparison.OrdinalIgnoreCase)
+            ? new MagickReadSettings { Density = new Density(300), BackgroundColor = MagickColors.None }
+            : new MagickReadSettings();
 
         // 움직이는 그림(GIF·WEBP)과 여러 쪽(TIFF·PDF)은 모든 프레임을 살린다
         if (targetId is "gif" or "webp" or "tiff" or "pdf")
         {
-            using var frames = new MagickImageCollection(source);
+            using var frames = new MagickImageCollection(source, settings);
             if (frames.Count > 1 && targetId is ("gif" or "webp"))
                 frames.Coalesce();
             foreach (var frame in frames)
@@ -26,7 +30,7 @@ internal static class ImageConverter
             return;
         }
 
-        using var image = new MagickImage(source);
+        using var image = new MagickImage(source, settings);
         image.AutoOrient();
 
         switch (targetId)

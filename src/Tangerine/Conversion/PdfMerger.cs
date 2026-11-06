@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 using PdfSharp.Pdf;
 using PdfSharp.Pdf.IO;
 using Tangerine.Core;
-using static Tangerine.Interop.NativeMethods;
+using Tangerine.Services;
 
 namespace Tangerine.Conversion;
 
 /// <summary>
-/// 끌어 온 PDF 를 파일 이름 순서(탐색기와 같이 2장 → 10장)로 합쳐 첫 파일 옆에 "첫파일 외 N개.pdf" 를 만든다.
+/// 끌어 온 PDF 를 선택한 순서대로 합쳐 첫 파일 옆에 "첫파일 외 N개.pdf" 를 만든다.
 /// 쪽을 그림으로 바꾸지 않고 그대로 옮기므로 글자 선택과 벡터 품질이 유지된다.
 /// </summary>
 internal static class PdfMerger
@@ -20,8 +20,9 @@ internal static class PdfMerger
 
     static string Merge(IReadOnlyList<string> files)
     {
-        // Windows 끌기 데이터의 파일 순서는 일정하지 않아 이름으로 맞춘다
-        var ordered = files.Select(Path.GetFullPath).Order(Comparer<string>.Create(StrCmpLogicalW)).ToList();
+        // 끌기 데이터에 담긴 순서 그대로 (탐색기는 고른 순서로 담고, 끌기를 시작한 파일을 맨 앞에 둔다)
+        var ordered = files.Select(Path.GetFullPath).ToList();
+        AppLog.Write($"합치기 순서: {string.Join(" → ", ordered.Select(Path.GetFileName))}");
         var first = ordered[0];
         var slot = Path.Combine(Path.GetDirectoryName(first)!, $"{Path.GetFileNameWithoutExtension(first)} 외 {ordered.Count - 1}개.pdf");
         var output = OutputPaths.Reserve(slot, ".pdf");
@@ -44,7 +45,8 @@ internal static class PdfMerger
         return output;
     }
 
-    static PdfDocument Open(string file)
+    /// <summary>쪽을 옮겨 오려고 연다. 손상·암호 PDF 는 어느 파일인지 알려 주는 오류로.</summary>
+    internal static PdfDocument Open(string file)
     {
         try
         {

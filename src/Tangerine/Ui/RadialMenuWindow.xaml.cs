@@ -382,8 +382,11 @@ public partial class RadialMenuWindow : Window
     /// <summary>바꿀 결과가 어떤 종류인지 보여 주는 아이콘 (Segoe Fluent Icons).</summary>
     static string IconOf(TargetFormat target) => target.Id switch
     {
+        "path" => "",
+        "csv" or "xlsx" or "srt" or "vtt" or "txt" => "",
         "zip" => "",
         "merge" => "",
+        "split" => "",
         "pdf" => "",
         "mp4" or "mov" or "mkv" or "webm" or "avi" => "",
         "mp3" or "wav" or "m4a" or "flac" or "ogg" or "opus" or "aiff" => "",
@@ -453,16 +456,16 @@ public partial class RadialMenuWindow : Window
     }
 
     /// <summary>
-    /// 열화상 띠: 윤곽에서 안쪽으로 들어간 깊이(가장 깊은 곳 = 1) 와 색. 얕은 것부터.
-    /// 첫 띠의 색은 윤곽 바로 안쪽(깊이 0 부터)에도 깔린다. 색 조절 미리보기에서 고른 값 (살구 → 주황 → 노랑).
+    /// 열화상 띠: 윤곽에서 안쪽으로 들어간 깊이(가장 깊은 곳 = 1), 색, 불투명도(0~1). 얕은 것부터.
+    /// 띠마다 자기 깊이부터 다음 띠 깊이 전까지만 칠하고, 첫 띠는 윤곽 바로 안쪽(깊이 0 부터)도 칠한다.
+    /// 색 조절 미리보기에서 고른 값 (주황 → 살구).
     /// </summary>
-    static readonly (double Depth, Color Color)[] ThermalBands =
+    static readonly (double Depth, Color Color, double Alpha)[] ThermalBands =
     [
-        (0.05, Color.FromRgb(0xFF, 0xC4, 0x9A)),
-        (0.05, Color.FromRgb(0xFF, 0x8A, 0x3D)),
-        (0.60, Color.FromRgb(0xFF, 0xF2, 0x6A)),
+        (0.05, Color.FromRgb(0xFF, 0x8A, 0x3D), 1.0),
+        (0.30, Color.FromRgb(0xFF, 0xC4, 0x9A), 1.0),
     ];
-    const double ThermalBlur = 0.30;    // 띠 사이 흐림 (가장 깊은 거리에 대한 비율, 최대 14px)
+    const double ThermalBlur = 0.60;    // 띠 사이 흐림 (가장 깊은 거리에 대한 비율, 최대 14px)
     const double ThermalOpacity = 1.0;
 
     /// <summary>
@@ -480,15 +483,18 @@ public partial class RadialMenuWindow : Window
             Effect = new BlurEffect { Radius = Math.Min(deepest * ThermalBlur, 14) },
             CacheMode = new BitmapCache(), // 밀려 나오는 애니메이션 동안 흐림을 다시 계산하지 않게
         };
-        // 첫 띠 색을 조각 밖까지 깔아 둔다. 그래야 흐릴 때 바깥의 빈 곳이 섞여 가장자리가 옅어지지 않는다.
-        var under = new Rectangle { Width = Side, Height = Side, Fill = new SolidColorBrush(ThermalBands[0].Color) };
-        bands.Children.Add(under);
-        foreach (var (depth, color) in ThermalBands)
+        Geometry? Inset(double depth) => ring ? RingGeometry(deepest * depth) : SliceGeometry(from, to, deepest * depth);
+        for (var i = 0; i < ThermalBands.Length; i++)
         {
-            var band = ring ? RingGeometry(deepest * depth) : SliceGeometry(from, to, deepest * depth);
-            if (band is null)
+            var (_, color, alpha) = ThermalBands[i];
+            // 첫 띠는 조각 밖까지 깔아 둔다. 그래야 흐릴 때 바깥의 빈 곳이 섞여 가장자리가 옅어지지 않는다.
+            var region = i == 0 ? new RectangleGeometry(new Rect(0, 0, Side, Side)) : Inset(ThermalBands[i].Depth);
+            if (region is null)
                 break;
-            bands.Children.Add(new Path { Data = band, Fill = new SolidColorBrush(color) });
+            // 다음 띠 자리는 비워 둔다. 띠마다 투명도가 달라도 아래 띠가 비쳐 섞이지 않게.
+            if (i + 1 < ThermalBands.Length && Inset(ThermalBands[i + 1].Depth) is { } inner)
+                region = Geometry.Combine(region, inner, GeometryCombineMode.Exclude, null);
+            bands.Children.Add(new Path { Data = region, Fill = new SolidColorBrush(color) { Opacity = alpha } });
         }
 
         var heat = new Canvas

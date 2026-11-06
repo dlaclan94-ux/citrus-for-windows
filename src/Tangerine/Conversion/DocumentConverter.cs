@@ -1,17 +1,21 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using ImageMagick;
 using Tangerine.Core;
 
 namespace Tangerine.Conversion;
 
 /// <summary>
 /// 설치된 한글·Word·Excel·PowerPoint 를 보이지 않게 띄워 문서를 PDF 로 저장한다.
-/// 결과 파일은 이미 빈 파일로 만들어져 있어 덮어쓴다.
+/// PowerPoint 슬라이드 → 그림, Excel 시트 ↔ CSV 도 여기서 한다.
+/// PDF 결과 파일은 이미 빈 파일로 만들어져 있어 덮어쓴다.
 /// </summary>
 internal static class DocumentConverter
 {
@@ -24,18 +28,33 @@ internal static class DocumentConverter
 
     static readonly TimeSpan Limit = TimeSpan.FromMinutes(3);
 
-    public static async Task ConvertAsync(string source, string output)
+    public static Task ConvertAsync(string source, string output, CancellationToken cancel) =>
+        RunExclusiveAsync(() => { Convert(source, output); return 0; }, cancel);
+
+    /// <summary>슬라이드마다 그림 한 장 ("발표 1장.jpg" …). 300dpi, 긴 변 10,000px 까지.</summary>
+    public static Task<IReadOnlyList<string>> SlidesAsync(string source, string extension, CancellationToken cancel) =>
+        RunExclusiveAsync(() => SlideImages(source, extension), cancel);
+
+    /// <summary>Excel → CSV (시트마다, UTF-8) 또는 CSV → XLSX.</summary>
+    public static Task<IReadOnlyList<string>> SpreadsheetAsync(string source, string targetId, CancellationToken cancel) =>
+        RunExclusiveAsync(() => targetId == "csv" ? SheetsToCsv(source) : CsvToWorkbook(source), cancel);
+
+    /// <summary>
+    /// 한 번에 하나씩, 숨은 STA 스레드에서 돌린다. 취소는 차례를 기다리는 동안에만 먹는다
+    /// (이미 시작한 Office 작업은 끝까지 한다).
+    /// </summary>
+    static async Task<T> RunExclusiveAsync<T>(Func<T> job, CancellationToken cancel)
     {
-        await OneAtATime.WaitAsync();
+        await OneAtATime.WaitAsync(cancel);
         try
         {
-            var work = RunOnSta(() => Convert(source, output));
+            var work = RunOnSta(job);
             if (await Task.WhenAny(work, Task.Delay(Limit)) != work)
             {
                 // ponytail: 숨은 창(복구·암호 대화상자 등)에 걸린 경우. 그 프로그램은 남아 있을 수 있어 작업 관리자에서 끄면 된다.
                 throw new TimeoutException("문서 프로그램이 응답하지 않습니다 (3분 초과)");
             }
-            await work;
+            return await work;
         }
         finally
         {
@@ -54,7 +73,8 @@ internal static class DocumentConverter
                 Word(source, output, text: null);
                 break;
             case ".txt":
-                Word(source, output, text: ReadText(source));
+                // Word 는 문단을 \r 로 나눈다
+                Word(source, output, text: TextFiles.Read(source).Replace("\r\n", "\r").Replace('\n', '\r'));
                 break;
             case ".xls" or ".xlsx":
                 Excel(source, output);
@@ -136,7 +156,74 @@ internal static class DocumentConverter
         }
     }
 
-    static void Excel(string source, string output)
+    static void Excel(string source, string output) =>
+        // Filename, UpdateLinks(0 = 안 함), ReadOnly, Format, Password
+        WithExcel(excel => excel.Workbooks.Open(source, 0, true, Type.Missing, NoPassword),
+            (_, book) => book.ExportAsFixedFormat(0, output)); // 0 = PDF, 모든 시트
+
+    /// <summary>시트마다 CSV (UTF-8). 시트가 하나면 "매출.csv", 여럿이면 "매출 시트이름.csv".</summary>
+    static IReadOnlyList<string> SheetsToCsv(string source)
+    {
+        var outputs = new List<string>();
+        try
+        {
+            WithExcel(excel => excel.Workbooks.Open(source, 0, true, Type.Missing, NoPassword), (excel, book) =>
+            {
+                int count = book.Worksheets.Count;
+                var dir = Path.GetDirectoryName(Path.GetFullPath(source))!;
+                for (var i = 1; i <= count; i++)
+                {
+                    dynamic sheet = book.Worksheets[i];
+                    var slot = count == 1 ? source : Path.Combine(dir, $"{Path.GetFileNameWithoutExtension(source)} {SafeFileName((string)sheet.Name)}.csv");
+                    var output = OutputPaths.Reserve(slot, ".csv");
+                    outputs.Add(output);
+                    sheet.Copy(); // 이 시트만 든 새 통합 문서를 만든다
+                    dynamic single = excel.ActiveWorkbook;
+                    single.SaveAs(output, 62); // 62 = CSV UTF-8
+                    single.Close(false);
+                }
+            });
+        }
+        catch
+        {
+            foreach (var output in outputs)
+                ConversionService.TryDelete(output);
+            throw;
+        }
+        return outputs;
+    }
+
+    /// <summary>CSV → XLSX. 글자 깨짐을 막으려고 인코딩(UTF-8 / CP949)을 직접 알려 주고 연다.</summary>
+    static IReadOnlyList<string> CsvToWorkbook(string source)
+    {
+        // Excel 은 확장자가 .csv 면 OpenText 의 인코딩 지정을 무시하므로 .txt 사본으로 연다
+        var bytes = File.ReadAllBytes(source);
+        var temp = Path.Combine(Path.GetTempPath(), $"tangerine-{Guid.NewGuid():N}.txt");
+        File.WriteAllBytes(temp, bytes);
+        var output = OutputPaths.Reserve(source, ".xlsx");
+        try
+        {
+            var origin = IsUtf8(bytes) ? 65001 : 949;
+            // Filename, Origin, StartRow, DataType(1 = 구분 기호), TextQualifier(1 = "), ConsecutiveDelimiter, Tab, Semicolon, Comma
+            WithExcel(excel =>
+            {
+                excel.Workbooks.OpenText(temp, origin, 1, 1, 1, false, false, false, true);
+                return excel.ActiveWorkbook;
+            }, (_, book) => book.SaveAs(output, 51)); // 51 = XLSX
+        }
+        catch
+        {
+            ConversionService.TryDelete(output);
+            throw;
+        }
+        finally
+        {
+            ConversionService.TryDelete(temp);
+        }
+        return [output];
+    }
+
+    static void WithExcel(Func<dynamic, dynamic> open, Action<dynamic, dynamic> work)
     {
         dynamic excel = Create("Excel.Application", "Microsoft Excel");
         dynamic? book = null;
@@ -145,20 +232,63 @@ internal static class DocumentConverter
             excel.Visible = false;
             excel.DisplayAlerts = false;
             excel.AutomationSecurity = MsoAutomationSecurityForceDisable;
-            // Filename, UpdateLinks(0 = 안 함), ReadOnly, Format, Password
-            book = excel.Workbooks.Open(source, 0, true, Type.Missing, NoPassword);
-            book.ExportAsFixedFormat(0, output); // 0 = PDF, 모든 시트
+            book = open(excel);
+            work(excel, book);
         }
         finally
         {
             book?.Close(false);
-            if ((int)excel.Workbooks.Count == 0)
-                excel.Quit();
+            while ((int)excel.Workbooks.Count > 0) // 시트 복사로 만든 통합 문서가 남았으면 닫는다
+                excel.Workbooks[1].Close(false);
+            excel.Quit();
             Release(excel);
         }
     }
 
-    static void PowerPoint(string source, string output)
+    static void PowerPoint(string source, string output) =>
+        WithPresentation(source, deck => deck.SaveAs(output, 32)); // 32 = PDF
+
+    static IReadOnlyList<string> SlideImages(string source, string extension)
+    {
+        var outputs = new List<string>();
+        try
+        {
+            WithPresentation(source, deck =>
+            {
+                // 슬라이드 크기는 포인트(1/72 인치) 단위
+                double width = deck.PageSetup.SlideWidth, height = deck.PageSetup.SlideHeight;
+                var scale = Math.Min(300 / 72.0, 10000 / Math.Max(width, height));
+                int count = deck.Slides.Count;
+                for (var i = 1; i <= count; i++)
+                {
+                    var output = OutputPaths.Reserve(PdfPages.PageSlot(source, i, count, "장"), extension);
+                    outputs.Add(output);
+                    var png = extension == ".png" ? output : Path.Combine(Path.GetTempPath(), $"tangerine-{Guid.NewGuid():N}.png");
+                    deck.Slides[i].Export(png, "PNG", (int)Math.Round(width * scale), (int)Math.Round(height * scale));
+                    if (png != output)
+                    {
+                        using (var image = new MagickImage(png))
+                        {
+                            image.BackgroundColor = MagickColors.White;
+                            image.Alpha(AlphaOption.Remove);
+                            image.Quality = 90;
+                            image.Write(output, MagickFormat.Jpeg);
+                        }
+                        ConversionService.TryDelete(png);
+                    }
+                }
+            });
+        }
+        catch
+        {
+            foreach (var output in outputs)
+                ConversionService.TryDelete(output);
+            throw;
+        }
+        return outputs;
+    }
+
+    static void WithPresentation(string source, Action<dynamic> work)
     {
         // PowerPoint 는 프로세스 하나를 모두 같이 쓴다. 사람이 열어 둔 발표 자료가 있으면 PowerPoint 를 끄지 않는다.
         var wasRunning = Process.GetProcessesByName("POWERPNT").Length > 0;
@@ -170,7 +300,7 @@ internal static class DocumentConverter
             ppt.AutomationSecurity = MsoAutomationSecurityForceDisable;
             // FileName, ReadOnly(-1 = 예), Untitled(0), WithWindow(0 = 창 없이)
             deck = ppt.Presentations.Open(source, -1, 0, 0);
-            deck.SaveAs(output, 32); // 32 = PDF
+            work(deck);
         }
         finally
         {
@@ -182,26 +312,21 @@ internal static class DocumentConverter
         }
     }
 
-    /// <summary>메모장 파일의 글자. BOM 이 있으면 그대로, 없으면 UTF-8 로 읽어 보고 깨지면 한국어 Windows 기본(CP949)으로.</summary>
-    static string ReadText(string path)
+    static bool IsUtf8(byte[] bytes)
     {
-        var bytes = File.ReadAllBytes(path);
-        string text;
-        using (var reader = new StreamReader(new MemoryStream(bytes), new UTF8Encoding(false, true), detectEncodingFromByteOrderMarks: true))
+        try
         {
-            try
-            {
-                text = reader.ReadToEnd();
-            }
-            catch (DecoderFallbackException)
-            {
-                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-                text = Encoding.GetEncoding(949).GetString(bytes);
-            }
+            new UTF8Encoding(false, true).GetString(bytes);
+            return true;
         }
-        // Word 는 문단을 \r 로 나눈다
-        return text.Replace("\r\n", "\r").Replace('\n', '\r');
+        catch (DecoderFallbackException)
+        {
+            return false;
+        }
     }
+
+    static string SafeFileName(string name) =>
+        string.Concat(name.Select(c => Path.GetInvalidFileNameChars().Contains(c) ? '_' : c));
 
     static dynamic Create(string progId, string appName)
     {
@@ -217,15 +342,14 @@ internal static class DocumentConverter
         GC.WaitForPendingFinalizers();
     }
 
-    static Task RunOnSta(Action action)
+    static Task<T> RunOnSta<T>(Func<T> job)
     {
-        var done = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var done = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
         var thread = new Thread(() =>
         {
             try
             {
-                action();
-                done.SetResult();
+                done.SetResult(job());
             }
             catch (Exception ex)
             {
