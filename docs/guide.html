@@ -44,7 +44,7 @@ body {
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
   padding-block: 40px 72px;
 }
-.page { max-width: 880px; margin: 0 auto; display: grid; gap: 56px; }
+.page { max-width: 880px; margin: 0 auto; display: grid; gap: 36px; }
 h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.3; }
 h1 { font-size: clamp(2rem, 5vw, 2.9rem); font-weight: 700; letter-spacing: -0.01em; }
 h2 { font-size: 1.45rem; font-weight: 700; }
@@ -67,14 +67,14 @@ section { display: grid; gap: 18px; }
 
 /* 쓰는 법: 실제 순서가 있는 세 단계 */
 .steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; list-style: none; margin: 0; padding: 0; counter-reset: step; }
-.steps li { counter-increment: step; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.steps li { counter-increment: step; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: grid; gap: 6px; align-content: start; min-width: 0; }
 .steps li::before { content: counter(step); font-family: var(--font-mono); font-weight: 500; color: var(--peel-deep); font-size: .85rem; }
 @media (max-width: 640px) { .steps { grid-template-columns: 1fr; } }
 
 /* 표 */
 .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
 table { width: 100%; border-collapse: collapse; font-size: .93rem; min-width: 560px; }
-th, td { text-align: left; vertical-align: top; padding: 12px 16px; border-bottom: 1px solid var(--line); }
+th, td { text-align: left; vertical-align: top; padding: 9px 14px; border-bottom: 1px solid var(--line); }
 tr:last-child td { border-bottom: 0; }
 th { font-family: var(--font-display); font-weight: 600; font-size: .8rem; letter-spacing: .04em; color: var(--muted); background: color-mix(in srgb, var(--pith) 45%, var(--surface)); }
 td:first-child { font-weight: 600; }
@@ -87,34 +87,48 @@ td:first-child { font-weight: 600; }
 
 /* 규칙 목록 */
 .rules { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-.rule { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.rule { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: grid; gap: 6px; align-content: start; min-width: 0; }
 .rule ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
 .rule li { overflow-wrap: anywhere; }
 .rule .file { white-space: normal; overflow-wrap: anywhere; }
 @media (max-width: 640px) { .rules { grid-template-columns: 1fr; } }
 
 .note { border-left: 3px solid var(--peel); padding: 4px 0 4px 16px; color: var(--muted); }
-.later ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
 footer { font-size: .85rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 18px; }
 :focus-visible { outline: 2px solid var(--peel); outline-offset: 2px; }
 
 /* PDF 로 인쇄할 때: A4, 흰 바탕, 표 줄·카드가 쪽 사이에서 잘리지 않게 */
 @page { size: A4; margin: 14mm 12mm; }
 @media print {
-  body { background: #fff; padding: 0; font-size: 13px; }
-  .page { max-width: none; gap: 28px; }
-  .hero { grid-template-columns: minmax(0, 1fr) 180px; }
-  .wheel { max-width: 180px; }
-  table { min-width: 0; font-size: 12px; }
-  th, td { padding: 8px 12px; }
+  body { background: #fff; padding: 0; font-size: 11.5px; line-height: 1.5; }
+  .page { max-width: none; gap: 0; }
+  h1 { font-size: 1.9rem; }
+  h2 { font-size: 1.15rem; }
+  h3 { font-size: .95rem; }
+  .hero { grid-template-columns: minmax(0, 1fr) 110px; gap: 20px; }
+  .hero .lead { font-size: 1rem; margin-top: 8px; }
+  .hero .meta { margin-top: 10px; }
+  .wheel { max-width: 110px; }
+  .steps li, .rule { padding: 10px 12px; gap: 4px; border-radius: 10px; }
+  .steps, .rules { gap: 8px; }
+  /* 카드는 한 줄에 셋 */
+  .rules { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .rule ul { gap: 2px; }
+  .table-wrap { border-radius: 10px; }
+  table { min-width: 0; font-size: 10.5px; }
+  .engine { font-size: .92em; }
+  th, td { padding: 4px 10px; }
+  .slices { gap: 4px; }
+  .slice { padding: 0 7px; font-size: .75rem; }
+  footer { padding-top: 10px; margin-top: 16px; }
   /* 표는 쪽 사이에서 자르지 않고 통째로 다음 쪽으로 */
   tr, .rule, .steps li, .table-wrap, table { break-inside: avoid; }
   /* 표가 있는 구역은 제목과 표를 한 쪽에 같이 둔다 (제목만 쪽 끝에 남지 않게) */
   section:has(.table-wrap) { break-inside: avoid; }
   /* grid 안에서는 쪽 나눔 설정이 먹지 않아, 인쇄할 때는 구역을 일반 흐름으로 */
   .page, section { display: block; }
-  section { margin-top: 26px; }
-  section > * + * { margin-top: 14px; }
+  section { margin-top: 16px; }
+  section > * + * { margin-top: 8px; }
   h2, .section-head { break-after: avoid; }
   .table-wrap { overflow: visible; }
 }
@@ -128,9 +142,25 @@ footer { font-size: .85rem; color: var(--muted); border-top: 1px solid var(--lin
       <div class="eyebrow">TANGERINE FOR WINDOWS</div>
       <h1>탠저린 기능 안내</h1>
       <p class="lead">탐색기에서 파일을 끌어오는 도중 <kbd>Shift</kbd> 를 누르면 커서 아래에 귤 조각 메뉴가 뜹니다. 원하는 조각 위에 놓으면 원본 옆에 새 파일이 생깁니다.</p>
-      <div class="meta"><span>제작 dlaclan</span><span>버전 1.0.1</span><span>Windows 10 (2004 이상) · 11, 64비트</span><span>모든 변환은 이 PC 안에서만</span></div>
+      <div class="meta"><span>제작 dlaclan</span><span>버전 1.0.2</span><span>Windows 10 (2004 이상) · 11, 64비트</span><span>모든 변환은 이 PC 안에서만</span></div>
     </div>
-    <img class="wheel" src="orange.png" width="480" height="480" alt="잎이 달린 오렌지 그림">
+    <svg class="wheel" viewBox="0 0 200 200" role="img" aria-label="오렌지 단면 그림: 껍질 안에 조각 열 개">
+      <circle cx="100" cy="100" r="97" fill="#FF8A3D"/>
+      <circle cx="100" cy="100" r="88" fill="#FFF1DC"/>
+      <g stroke-width="3" stroke-linejoin="round">
+        <path d="M103.0 91.0L103.0 20.0A80 80 0 0 1 144.6 33.52L102.86 90.96Z" fill="#FFA53F" stroke="#FFA53F"/>
+        <path d="M107.72 94.48L149.45 37.04A80 80 0 0 1 175.16 72.43L107.63 94.37Z" fill="#FFB352" stroke="#FFB352"/>
+        <path d="M109.49 100.07L177.01 78.13A80 80 0 0 1 177.01 121.87L109.49 99.93Z" fill="#FFA53F" stroke="#FFA53F"/>
+        <path d="M107.63 105.63L175.16 127.57A80 80 0 0 1 149.45 162.96L107.72 105.52Z" fill="#FFB352" stroke="#FFB352"/>
+        <path d="M102.86 109.04L144.6 166.48A80 80 0 0 1 103.0 180.0L103.0 109.0Z" fill="#FFA53F" stroke="#FFA53F"/>
+        <path d="M97.0 109.0L97.0 180.0A80 80 0 0 1 55.4 166.48L97.14 109.04Z" fill="#FFB352" stroke="#FFB352"/>
+        <path d="M92.28 105.52L50.55 162.96A80 80 0 0 1 24.84 127.57L92.37 105.63Z" fill="#FFA53F" stroke="#FFA53F"/>
+        <path d="M90.51 99.93L22.99 121.87A80 80 0 0 1 22.99 78.13L90.51 100.07Z" fill="#FFB352" stroke="#FFB352"/>
+        <path d="M92.37 94.37L24.84 72.43A80 80 0 0 1 50.55 37.04L92.28 94.48Z" fill="#FFA53F" stroke="#FFA53F"/>
+        <path d="M97.14 90.96L55.4 33.52A80 80 0 0 1 97.0 20.0L97.0 91.0Z" fill="#FFB352" stroke="#FFB352"/>
+      </g>
+      <circle cx="100" cy="100" r="7" fill="#FFF1DC"/>
+    </svg>
   </header>
 
   <section aria-labelledby="how">
@@ -270,7 +300,7 @@ footer { font-size: .85rem; color: var(--muted); border-top: 1px solid var(--lin
         <li>기록: <span class="file">%LOCALAPPDATA%\Tangerine\tangerine.log</span></li>
       </ul></div>
       <div class="rule"><h3>설치</h3><ul>
-        <li><span class="file">Tangerine-Setup-v1.0.1.exe</span> 를 실행하면 내 계정에 설치 (관리자 권한 필요 없음)</li>
+        <li><span class="file">Tangerine-Setup-v1.0.2.exe</span> 를 실행하면 내 계정에 설치 (관리자 권한 필요 없음)</li>
         <li>위치: <span class="file">%LOCALAPPDATA%\Programs\Tangerine</span></li>
         <li>바탕화면 바로가기, Windows 시작 시 자동 실행은 설치할 때 고름</li>
         <li>시작 메뉴에 <b>탠저린</b>, <b>탠저린 설명서</b></li>
@@ -281,16 +311,10 @@ footer { font-size: .85rem; color: var(--muted); border-top: 1px solid var(--lin
         <li>뒤 화면이 흐리게 비치는 유리, 고른 조각만 열화상 색</li>
         <li>라이트·다크 모드, 투명 효과·애니메이션 끄기, 고대비를 따름</li>
       </ul></div>
-    </div>
-  </section>
-
-
-  <section aria-labelledby="install-notes">
-    <div class="section-head"><h2 id="install-notes">처음 설치할 때</h2></div>
-    <div class="rules">
-      <div class="rule"><h3>"Windows 의 PC 보호" 창이 뜨면</h3><ul>
-        <li>서명하지 않은 개인 프로그램이라 처음 실행할 때 뜰 수 있습니다</li>
-        <li><b>추가 정보</b> → <b>실행</b> 을 누르면 설치가 이어집니다</li>
+      <div class="rule"><h3>"Windows 의 PC 보호" 창</h3><ul>
+        <li>서명하지 않은 개인 프로그램이라, 인터넷·메신저로 받은 설치 파일을 처음 열 때 뜹니다</li>
+        <li>미리 막기: 설치 파일 오른쪽 클릭 → <b>속성</b> → 아래쪽 <b>차단 해제</b> 체크 → 확인</li>
+        <li>이미 떴다면 <b>추가 정보</b> → <b>실행</b></li>
       </ul></div>
       <div class="rule"><h3>필요한 프로그램</h3><ul>
         <li>사진·영상·오디오·PDF·자막·압축: 따로 필요 없음 (ffmpeg 포함)</li>
@@ -314,7 +338,7 @@ footer { font-size: .85rem; color: var(--muted); border-top: 1px solid var(--lin
     </div>
   </section>
 
-  <footer>탠저린 for Windows 1.0.1 · 제작 dlaclan · 맥용 Tangerine(Leap Studio)을 참고해 만든 개인 프로젝트 · 사용한 오픈소스: ffmpeg(GPL), Magick.NET(Apache-2.0), PDFsharp(MIT)</footer>
+  <footer>탠저린 for Windows 1.0.2 · 제작 dlaclan · 맥용 Tangerine(Leap Studio)을 참고해 만든 개인 프로젝트 · 사용한 오픈소스: ffmpeg(GPL), Magick.NET(Apache-2.0), PDFsharp(MIT)</footer>
 </div>
 
 </body>
