@@ -107,7 +107,10 @@ footer { font-size: .85rem; color: var(--muted); border-top: 1px solid var(--lin
   .wheel { max-width: 180px; }
   table { min-width: 0; font-size: 12px; }
   th, td { padding: 8px 12px; }
-  tr, .rule, .steps li { break-inside: avoid; }
+  /* 표는 쪽 사이에서 자르지 않고 통째로 다음 쪽으로 */
+  tr, .rule, .steps li, .table-wrap, table { break-inside: avoid; }
+  /* 표가 있는 구역은 제목과 표를 한 쪽에 같이 둔다 (제목만 쪽 끝에 남지 않게) */
+  section:has(.table-wrap) { break-inside: avoid; }
   /* grid 안에서는 쪽 나눔 설정이 먹지 않아, 인쇄할 때는 구역을 일반 흐름으로 */
   .page, section { display: block; }
   section { margin-top: 26px; }
@@ -116,16 +119,16 @@ footer { font-size: .85rem; color: var(--muted); border-top: 1px solid var(--lin
   .table-wrap { overflow: visible; }
 }
 </style>
-
 </head>
 <body>
+
 <div class="page">
   <header class="hero">
     <div>
       <div class="eyebrow">TANGERINE FOR WINDOWS</div>
       <h1>탠저린 기능 안내</h1>
       <p class="lead">탐색기에서 파일을 끌어오는 도중 <kbd>Shift</kbd> 를 누르면 커서 아래에 귤 조각 메뉴가 뜹니다. 원하는 조각 위에 놓으면 원본 옆에 새 파일이 생깁니다.</p>
-      <div class="meta"><span>제작 dlaclan</span><span>버전 1.0.0</span><span>Windows 10 (2004 이상) · 11, 64비트</span><span>모든 변환은 이 PC 안에서만</span></div>
+      <div class="meta"><span>제작 dlaclan</span><span>버전 1.0.1</span><span>Windows 10 (2004 이상) · 11, 64비트</span><span>모든 변환은 이 PC 안에서만</span></div>
     </div>
     <img class="wheel" src="orange.png" width="480" height="480" alt="잎이 달린 오렌지 그림">
   </header>
@@ -267,7 +270,7 @@ footer { font-size: .85rem; color: var(--muted); border-top: 1px solid var(--lin
         <li>기록: <span class="file">%LOCALAPPDATA%\Tangerine\tangerine.log</span></li>
       </ul></div>
       <div class="rule"><h3>설치</h3><ul>
-        <li><span class="file">Tangerine-Setup-v1.0.0.exe</span> 를 실행하면 내 계정에 설치 (관리자 권한 필요 없음)</li>
+        <li><span class="file">Tangerine-Setup-v1.0.1.exe</span> 를 실행하면 내 계정에 설치 (관리자 권한 필요 없음)</li>
         <li>위치: <span class="file">%LOCALAPPDATA%\Programs\Tangerine</span></li>
         <li>바탕화면 바로가기, Windows 시작 시 자동 실행은 설치할 때 고름</li>
         <li>시작 메뉴에 <b>탠저린</b>, <b>탠저린 설명서</b></li>
@@ -281,17 +284,6 @@ footer { font-size: .85rem; color: var(--muted); border-top: 1px solid var(--lin
     </div>
   </section>
 
-  <section aria-labelledby="limits" class="later">
-    <div class="section-head"><h2 id="limits">한계와 아직 없는 기능</h2></div>
-    <p class="note">관리자 권한으로 실행한 프로그램에서 끌어 온 파일은 Windows 보안 정책 때문에 받을 수 없습니다. 반디집으로 만든 ZIP 은 파일 이름이 CP949 라 맥에서 풀면 한글 이름이 깨질 수 있습니다.</p>
-    <ul>
-      <li><kbd>Ctrl</kbd> + 끌기 파일 도구: 용량 압축, 자르기, 영상 자르기·나누기, PDF 쪽 골라 빼기, 메타데이터 삭제</li>
-      <li><kbd>Alt</kbd> + 끌기 파일 동작: 복사, 이동, 경로 복사, 터미널 열기</li>
-      <li>한글·Office 가 없는 PC 를 위한 문서 변환, EPUB</li>
-      <li>탐색기 오른쪽 클릭 "변환" 메뉴</li>
-      <li>PDF 합치기의 책갈피(목차) 옮기기</li>
-    </ul>
-  </section>
 
   <section aria-labelledby="install-notes">
     <div class="section-head"><h2 id="install-notes">처음 설치할 때</h2></div>
@@ -322,9 +314,8 @@ footer { font-size: .85rem; color: var(--muted); border-top: 1px solid var(--lin
     </div>
   </section>
 
-  <footer>탠저린 for Windows 1.0.0 · 제작 dlaclan · 맥용 Tangerine(Leap Studio)을 참고해 만든 개인 프로젝트 · 사용한 오픈소스: ffmpeg(GPL), Magick.NET(Apache-2.0), PDFsharp(MIT)</footer>
+  <footer>탠저린 for Windows 1.0.1 · 제작 dlaclan · 맥용 Tangerine(Leap Studio)을 참고해 만든 개인 프로젝트 · 사용한 오픈소스: ffmpeg(GPL), Magick.NET(Apache-2.0), PDFsharp(MIT)</footer>
 </div>
-
 
 </body>
 </html>
