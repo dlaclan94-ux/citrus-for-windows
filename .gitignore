@@ -5,3 +5,4 @@ out/
 *.user
 TestResults/
 src/Tangerine/tools/
+src/Tangerine/hancom/*.dll

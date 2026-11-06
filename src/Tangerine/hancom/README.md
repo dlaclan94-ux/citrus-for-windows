@@ -1,6 +1,6 @@
 # 한글 오토메이션 보안 승인 모듈
 
-`FilePathCheckerModuleExample.dll` 은 한컴이 공개한 보안 승인 모듈 예제를 그대로 가져온 것입니다.
+`FilePathCheckerModuleExample.dll` 은 한컴이 공개한 보안 승인 모듈 예제입니다. 저장소에는 넣지 않고 `scripts/fetch-hancom.ps1` 로 받습니다 (커밋·해시 고정).
 
 - 출처: [hancom-io/devcenter-archive](https://github.com/hancom-io/devcenter-archive) 의 `hwp-automation/보안모듈(Automation).zip`
 - 32비트 (한글 2018 의 `hwp.exe` 가 32비트)

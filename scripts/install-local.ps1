@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
   이 PC 에 탠저린을 설치한다: 단일 exe 로 만들어 내 계정 프로그램 폴더에 두고,
   로그인할 때 자동 실행 + 바탕화면·시작 메뉴 바로가기를 만든 뒤 실행한다.
@@ -23,6 +23,9 @@ $dotnet = if (Test-Path $userDotnet) { $userDotnet } else { 'dotnet' }
 
 if (-not (Test-Path (Join-Path $root 'src\Tangerine\tools\ffmpeg.exe'))) {
     & (Join-Path $PSScriptRoot 'fetch-ffmpeg.ps1')
+}
+if (-not (Test-Path (Join-Path $root 'src\Tangerine\hancom\FilePathCheckerModuleExample.dll'))) {
+    & (Join-Path $PSScriptRoot 'fetch-hancom.ps1')
 }
 
 # 켜져 있으면 파일이 잠겨 바꿀 수 없다

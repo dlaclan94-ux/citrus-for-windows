@@ -3,6 +3,14 @@
 맥용 파일 변환 앱 [Tangerine](https://tangerineformac.com)(Leap Studio)의 핵심 동작을 Windows 에서 쓰려고 만든 프로그램입니다.
 원본 앱과는 관계가 없는 개인 프로젝트입니다. 참고한 소개 글: [AI매터스 — Tangerine](https://aimatters.co.kr/ai-tool/56353/)
 
+> **English** — A drag-and-drop file converter for Windows. Start dragging files in File Explorer, press `Shift`,
+> and a radial "tangerine slice" menu appears under the cursor; drop on a slice and the converted file is saved
+> next to the original. It handles images, video and audio (FFmpeg), Hangul/Word/Excel/PowerPoint → PDF,
+> PDF merge, split and PDF → JPG/PNG, Excel ↔ CSV, subtitles (SRT ↔ VTT), ZIP and copying file paths.
+> Everything runs locally; nothing is uploaded. Windows 10 (2004+) / 11, 64-bit.
+> A personal project by **dlaclan**, inspired by the drag-to-convert workflow of [Tangerine](https://tangerineformac.com)
+> for macOS (Leap Studio). It is not affiliated with Leap Studio or the original app.
+
 ## 사용 방법
 
 1. `Tangerine.exe` 를 실행하면 창 없이 **알림 영역(작업 표시줄 오른쪽)** 에 귤 아이콘이 생깁니다.
@@ -74,7 +82,8 @@
 - **설치 파일 `Tangerine-Setup-v*.exe` (추천)**: 내 계정(`%LOCALAPPDATA%\Programs\Tangerine`)에 설치해 관리자 권한이 필요 없습니다.
   바탕화면 바로가기와 로그인 시 자동 실행은 설치할 때 고르고, 시작 메뉴에 탠저린·탠저린 설명서가 생깁니다. 제거는 Windows 설정 → 앱.
 - **묶음 `Tangerine-v*-win-x64.zip`**: 원하는 폴더에 풀고 `Tangerine.exe` 를 실행합니다. `tools\ffmpeg.exe` 는 영상·오디오 변환에 쓰므로 같이 두세요.
-- .NET 설치는 필요 없습니다. 서명하지 않은 프로그램이라 "Windows 의 PC 보호" 창이 뜨면 **추가 정보 → 실행** 을 누르세요.
+- .NET 설치는 필요 없습니다. 서명하지 않은 프로그램이라 "Windows 의 PC 보호" 창이 뜰 수 있습니다.
+  설치 파일 오른쪽 클릭 → **속성** → **차단 해제** 체크 후 실행하면 뜨지 않고, 이미 떴다면 **추가 정보 → 실행** 을 누르세요.
 - Windows 10 (2004 이상) / 11, 64비트
 - 관리자 권한으로 실행한 프로그램에서 끌어 온 파일은 Windows 보안 정책 때문에 받을 수 없습니다.
 
@@ -85,6 +94,7 @@
 ```powershell
 dotnet test tests/Tangerine.Core.Tests     # 형식 목록·파일 이름·ffmpeg 인자 테스트 (맥에서도 실행됨)
 .\scripts\fetch-ffmpeg.ps1                  # src\Tangerine\tools\ffmpeg.exe 받기 (처음 한 번)
+.\scripts\fetch-hancom.ps1                  # 한글 보안 승인 모듈 받기 (처음 한 번, 없으면 HWP 변환 때 확인 창이 뜸)
 dotnet run --project src/Tangerine          # 실행
 .\scripts\install-local.ps1                 # 이 PC 에 설치: %LOCALAPPDATA%\Programs\Tangerine, 로그인 시 자동 실행, 바탕화면·시작 메뉴 바로가기
 .\scripts\build-guide.ps1                   # docs\guide.html → docs\tangerine-guide.pdf (Edge 필요)
@@ -117,5 +127,6 @@ dotnet run --project src/Tangerine          # 실행
 ## 라이선스 참고
 
 - 배포 zip 의 `tools\ffmpeg.exe` 는 [BtbN/FFmpeg-Builds](https://github.com/BtbN/FFmpeg-Builds) 의 GPL 빌드이며 라이선스는 `tools\FFMPEG-LICENSE.txt` 에 있습니다.
+- 한글 보안 승인 모듈 `hancom\FilePathCheckerModuleExample.dll` 은 한컴이 공개한 예제([hancom-io/devcenter-archive](https://github.com/hancom-io/devcenter-archive))로, 저장소에 넣지 않고 빌드할 때 받습니다.
 - 이미지 변환은 [Magick.NET](https://github.com/dlemstra/Magick.NET) (Apache-2.0) 을 씁니다.
 - PDF 합치기·나누기는 [PDFsharp](https://docs.pdfsharp.net/) 6.2.4 (MIT) 를 씁니다. 6.5.0 부터 AGPL-3.0 이라 올리기 전에 라이선스를 확인해야 합니다.

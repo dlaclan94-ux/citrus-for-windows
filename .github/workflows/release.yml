@@ -28,6 +28,9 @@ jobs:
       - name: Test
         run: dotnet test tests/Tangerine.Core.Tests -c Release
 
+      - name: Hancom module
+        run: ./scripts/fetch-hancom.ps1
+
       - name: Publish single-file exe
         run: >
           dotnet publish src/Tangerine/Tangerine.csproj -c Release -r win-x64 --self-contained true
