@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-  docs\guide.html 로 설명서 PDF(docs\tangerine-guide.pdf, A4)를 만든다. Microsoft Edge 가 필요하다.
+  docs\guide.html 로 설명서 PDF(docs\citrus-guide.pdf, A4)를 만든다. Microsoft Edge 가 필요하다.
 
 .EXAMPLE
   .\scripts\build-guide.ps1
@@ -13,8 +13,8 @@ $edge = @(
 ) | Where-Object { Test-Path $_ } | Select-Object -First 1
 if (-not $edge) { throw 'Microsoft Edge 를 찾지 못했습니다' }
 
-$pdf = Join-Path $docs 'tangerine-guide.pdf'
-$profile = Join-Path ([IO.Path]::GetTempPath()) ('tangerine-edge-' + [guid]::NewGuid())
+$pdf = Join-Path $docs 'citrus-guide.pdf'
+$profile = Join-Path ([IO.Path]::GetTempPath()) ('citrus-edge-' + [guid]::NewGuid())
 try {
     # 글꼴(Google Fonts)을 받을 틈을 주고 인쇄한다
     & $edge --headless=new --disable-gpu --no-first-run --user-data-dir="$profile" --no-pdf-header-footer `

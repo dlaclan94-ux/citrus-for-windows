@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Citrus.Core/Citrus.Core.csproj" />
+    <Project Path="src/Citrus/Citrus.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Citrus.Core.Tests/Citrus.Core.Tests.csproj" />
+  </Folder>
+</Solution>

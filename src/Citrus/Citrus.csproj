@@ -1,0 +1,51 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <!-- 10.0.19041: Windows 기본 PDF 렌더러(Windows.Data.Pdf)를 쓰기 위해. Windows 10 2004 이상 -->
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <!-- WPF 와 WinForms 를 같이 쓰면 Application, Point 같은 이름이 겹치므로 using 은 직접 적는다 -->
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <PlatformTarget>x64</PlatformTarget>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Citrus.ico</ApplicationIcon>
+    <!-- WinForms 는 알림 아이콘에만 쓴다. DPI 는 WPF 를 위해 매니페스트에서 정하므로 WinForms 권고(WFO0003)는 끈다 -->
+    <NoWarn>$(NoWarn);WFO0003</NoWarn>
+    <AssemblyName>Citrus</AssemblyName>
+    <RootNamespace>Citrus</RootNamespace>
+    <Product>Citrus for Windows</Product>
+    <Version>1.1.0</Version>
+    <Company>dlaclan</Company>
+    <Authors>dlaclan</Authors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Magick.NET-Q8-x64" Version="14.17.2" />
+    <!-- 6.2.4 로 고정: 6.5.0 부터 라이선스가 MIT 에서 AGPL-3.0 으로 바뀌었다 -->
+    <PackageReference Include="PDFsharp" Version="6.2.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Citrus.Core\Citrus.Core.csproj" />
+  </ItemGroup>
+
+  <!-- 귤 단면 아이콘: 실행 파일·바로가기 아이콘이자 알림 영역 아이콘 -->
+  <ItemGroup>
+    <EmbeddedResource Include="Citrus.ico" LogicalName="Citrus.ico" />
+  </ItemGroup>
+
+  <!-- 한글 자동화 보안 승인 모듈 (hancom\README.md, scripts/fetch-hancom.ps1 로 받음). 한글(hwp.exe)이 직접 불러 쓰므로 실행 파일 옆에 둔다 -->
+  <ItemGroup Condition="Exists('hancom\FilePathCheckerModuleExample.dll')">
+    <None Include="hancom\FilePathCheckerModuleExample.dll" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+  </ItemGroup>
+
+  <!-- scripts/fetch-ffmpeg.ps1 로 받은 ffmpeg.exe 를 실행 파일 옆 tools\ 에 둔다 (단일 파일 안에는 넣지 않음) -->
+  <ItemGroup Condition="Exists('tools')">
+    <None Include="tools\**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+  </ItemGroup>
+
+</Project>

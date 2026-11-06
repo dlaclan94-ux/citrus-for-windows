@@ -4,5 +4,5 @@ out/
 .vs/
 *.user
 TestResults/
-src/Tangerine/tools/
-src/Tangerine/hancom/*.dll
+src/Citrus/tools/
+src/Citrus/hancom/*.dll

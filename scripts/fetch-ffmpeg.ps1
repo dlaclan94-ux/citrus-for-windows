@@ -4,14 +4,14 @@
 
 .DESCRIPTION
   BtbN/FFmpeg-Builds 의 Windows 64비트 GPL 빌드(정식 릴리스 줄기)에서 ffmpeg.exe 와 라이선스만 꺼낸다.
-  기본 위치는 src\Tangerine\tools 이며, 빌드하면 실행 파일 옆 tools\ 로 복사된다.
+  기본 위치는 src\Citrus\tools 이며, 빌드하면 실행 파일 옆 tools\ 로 복사된다.
 
 .EXAMPLE
   .\scripts\fetch-ffmpeg.ps1
-  .\scripts\fetch-ffmpeg.ps1 -Destination out\Tangerine\tools
+  .\scripts\fetch-ffmpeg.ps1 -Destination out\Citrus\tools
 #>
 param(
-    [string]$Destination = (Join-Path $PSScriptRoot '..\src\Tangerine\tools'),
+    [string]$Destination = (Join-Path $PSScriptRoot '..\src\Citrus\tools'),
     [string]$Version = '8.1'
 )
 
@@ -20,7 +20,7 @@ $ProgressPreference = 'SilentlyContinue'
 
 $name = "ffmpeg-n$Version-latest-win64-gpl-$Version"
 $url = "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/$name.zip"
-$work = Join-Path ([IO.Path]::GetTempPath()) ("tangerine-ffmpeg-" + [guid]::NewGuid())
+$work = Join-Path ([IO.Path]::GetTempPath()) ("citrus-ffmpeg-" + [guid]::NewGuid())
 New-Item -ItemType Directory -Path $work | Out-Null
 
 try {

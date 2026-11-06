@@ -5,12 +5,12 @@
 .DESCRIPTION
   hancom-io/devcenter-archive 의 hwp-automation/보안모듈(Automation).zip 에서 DLL 만 꺼낸다.
   저장소에 바이너리를 두지 않으려고 빌드할 때 받는다. 커밋과 해시를 고정해 같은 파일만 받는다.
-  기본 위치는 src\Tangerine\hancom 이며, 빌드하면 실행 파일 옆 hancom\ 으로 복사된다.
+  기본 위치는 src\Citrus\hancom 이며, 빌드하면 실행 파일 옆 hancom\ 으로 복사된다.
 
 .EXAMPLE
   .\scripts\fetch-hancom.ps1
 #>
-param([string]$Destination = (Join-Path $PSScriptRoot '..\src\Tangerine\hancom'))
+param([string]$Destination = (Join-Path $PSScriptRoot '..\src\Citrus\hancom'))
 
 $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
@@ -18,7 +18,7 @@ $ProgressPreference = 'SilentlyContinue'
 $commit = 'ec0c158c69195070dabcb086e11dd197c336bf8e'
 $sha256 = '9AC5B97C47AC8AED1E8BCA27A3EEF39411361D8F68C262509F0C40A8F9D21BB6'
 $url = "https://raw.githubusercontent.com/hancom-io/devcenter-archive/$commit/hwp-automation/" + [Uri]::EscapeDataString('보안모듈(Automation).zip')
-$work = Join-Path ([IO.Path]::GetTempPath()) ("tangerine-hancom-" + [guid]::NewGuid())
+$work = Join-Path ([IO.Path]::GetTempPath()) ("citrus-hancom-" + [guid]::NewGuid())
 New-Item -ItemType Directory -Path $work | Out-Null
 
 try {

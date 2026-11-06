@@ -16,7 +16,7 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Test
-        run: dotnet test tests/Tangerine.Core.Tests -c Release
+        run: dotnet test tests/Citrus.Core.Tests -c Release
 
       - name: Build app
-        run: dotnet build src/Tangerine/Tangerine.csproj -c Release
+        run: dotnet build src/Citrus/Citrus.csproj -c Release

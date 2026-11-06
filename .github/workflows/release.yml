@@ -26,51 +26,51 @@ jobs:
           "VERSION=$v" >> $env:GITHUB_ENV
 
       - name: Test
-        run: dotnet test tests/Tangerine.Core.Tests -c Release
+        run: dotnet test tests/Citrus.Core.Tests -c Release
 
       - name: Hancom module
         run: ./scripts/fetch-hancom.ps1
 
       - name: Publish single-file exe
         run: >
-          dotnet publish src/Tangerine/Tangerine.csproj -c Release -r win-x64 --self-contained true
+          dotnet publish src/Citrus/Citrus.csproj -c Release -r win-x64 --self-contained true
           -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=None
           -p:Version=$env:VERSION
-          -o out/Tangerine
+          -o out/Citrus
 
       - name: Bundle ffmpeg
-        run: ./scripts/fetch-ffmpeg.ps1 -Destination out/Tangerine/tools
+        run: ./scripts/fetch-ffmpeg.ps1 -Destination out/Citrus/tools
 
       - name: Installer
         run: |
           $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
           if (-not (Test-Path $iscc)) { choco install innosetup -y --no-progress }
-          & $iscc "/DAppVersion=$env:VERSION" installer\Tangerine.iss
+          & $iscc "/DAppVersion=$env:VERSION" installer\Citrus.iss
           if ($LASTEXITCODE -ne 0) { throw "ISCC 실패 ($LASTEXITCODE)" }
 
       - name: Zip and guide
         run: |
-          Copy-Item README.md out/Tangerine/
-          Copy-Item docs/tangerine-guide.pdf out/Tangerine/
-          Compress-Archive -Path out/Tangerine/* -DestinationPath "out/Tangerine-v$env:VERSION-win-x64.zip"
-          Copy-Item docs/tangerine-guide.pdf "out/Tangerine-Guide-v$env:VERSION.pdf"
+          Copy-Item README.md out/Citrus/
+          Copy-Item docs/citrus-guide.pdf out/Citrus/
+          Compress-Archive -Path out/Citrus/* -DestinationPath "out/Citrus-v$env:VERSION-win-x64.zip"
+          Copy-Item docs/citrus-guide.pdf "out/Citrus-Guide-v$env:VERSION.pdf"
 
       - name: Keep build (manual run)
         if: github.ref_type != 'tag'
         uses: actions/upload-artifact@v4
         with:
-          name: tangerine-test-build
+          name: citrus-test-build
           path: |
-            out/Tangerine-Setup-v*.exe
-            out/Tangerine-v*-win-x64.zip
-            out/Tangerine-Guide-v*.pdf
+            out/Citrus-Setup-v*.exe
+            out/Citrus-v*-win-x64.zip
+            out/Citrus-Guide-v*.pdf
 
       - uses: softprops/action-gh-release@v2
         if: github.ref_type == 'tag'
         with:
-          name: 탠저린 ${{ github.ref_name }}
+          name: 시트러스 ${{ github.ref_name }}
           body_path: installer/release-notes.md
           files: |
-            out/Tangerine-Setup-v*.exe
-            out/Tangerine-v*-win-x64.zip
-            out/Tangerine-Guide-v*.pdf
+            out/Citrus-Setup-v*.exe
+            out/Citrus-v*-win-x64.zip
+            out/Citrus-Guide-v*.pdf

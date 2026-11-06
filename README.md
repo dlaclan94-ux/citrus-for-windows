@@ -1,10 +1,10 @@
-# Tangerine for Windows — 끌어서 바로 바꾸는 파일 변환기
+# Citrus for Windows — 끌어서 바로 바꾸는 파일 변환기
 
 맥용 파일 변환 앱 [Tangerine](https://tangerineformac.com)(Leap Studio)의 핵심 동작을 Windows 에서 쓰려고 만든 프로그램입니다.
 원본 앱과는 관계가 없는 개인 프로젝트입니다. 참고한 소개 글: [AI매터스 — Tangerine](https://aimatters.co.kr/ai-tool/56353/)
 
 > **English** — A drag-and-drop file converter for Windows. Start dragging files in File Explorer, press `Shift`,
-> and a radial "tangerine slice" menu appears under the cursor; drop on a slice and the converted file is saved
+> and a radial "citrus slice" menu appears under the cursor; drop on a slice and the converted file is saved
 > next to the original. It handles images, video and audio (FFmpeg), Hangul/Word/Excel/PowerPoint → PDF,
 > PDF merge, split and PDF → JPG/PNG, Excel ↔ CSV, subtitles (SRT ↔ VTT), ZIP and copying file paths.
 > Everything runs locally; nothing is uploaded. Windows 10 (2004+) / 11, 64-bit.
@@ -13,7 +13,7 @@
 
 ## 사용 방법
 
-1. `Tangerine.exe` 를 실행하면 창 없이 **알림 영역(작업 표시줄 오른쪽)** 에 귤 아이콘이 생깁니다.
+1. `Citrus.exe` 를 실행하면 창 없이 **알림 영역(작업 표시줄 오른쪽)** 에 귤 아이콘이 생깁니다.
 2. 탐색기나 바탕화면에서 파일을 **끌어오는 도중 `Shift`** 를 누르면 커서 아래에 원형 메뉴가 뜹니다.
 3. 원하는 형식 칸 위에 놓으면 **원본과 같은 폴더에 새 파일**이 생깁니다. 원본은 그대로 둡니다.
    - 같은 이름이 있으면 `사진 (1).jpg` 처럼 번호를 붙입니다.
@@ -38,12 +38,12 @@
 | 엑셀 — XLS, XLSX | PDF, CSV(시트마다, UTF-8) | 설치된 Excel |
 | CSV | XLSX | 설치된 Excel |
 | 발표 — PPT, PPTX | PDF, JPG·PNG(장마다 한 장) | 설치된 PowerPoint |
-| 자막 — SRT, VTT | SRT, VTT, TXT(대사만) | 탠저린 자체 |
+| 자막 — SRT, VTT | SRT, VTT, TXT(대사만) | 시트러스 자체 |
 | PDF | 나누기 — 쪽마다 PDF 한 개 | PDFsharp |
 | PDF | JPG, PNG — 쪽마다 한 장 | Windows 기본 PDF 렌더러 |
 | PDF 여러 개 | 합치기 — PDF 하나로 | PDFsharp |
 | 무엇이든 (파일·폴더, 여러 개) | ZIP — 끌어 온 것을 모두 묶어 하나로 | 반디집 (없으면 Windows 기본 ZIP) |
-| 무엇이든 (파일·폴더, 여러 개) | 경로 복사 — 전체 경로를 한 줄에 하나씩 클립보드로 | 탠저린 자체 |
+| 무엇이든 (파일·폴더, 여러 개) | 경로 복사 — 전체 경로를 한 줄에 하나씩 클립보드로 | 시트러스 자체 |
 
 - 메뉴의 마지막 두 조각은 늘 **ZIP → 경로** 입니다. 압축은 파일 하나면 `그이름.zip`, 여럿이면 들어 있던 `폴더이름.zip` 을 만듭니다.
 - 발표 → 그림은 300dpi(16:9 면 4000×2250px) 로 `발표 1장.jpg`, `발표 2장.jpg` … 를 만듭니다.
@@ -69,19 +69,19 @@
 | Shift 끌기로 변환 켜기 | 끄면 Shift 를 눌러도 메뉴가 뜨지 않습니다 |
 | 탐색기·바탕화면에서만 작동 | 기본 켜짐. 끄면 브라우저 등 다른 프로그램에서 끌어 온 파일에도 반응합니다 (글자를 Shift+끌어 선택할 때 메뉴가 같이 뜰 수 있음) |
 | Windows 시작 시 실행 | 로그인할 때 자동으로 켭니다 (`HKCU\...\Run`) |
-| 기록 폴더 열기 | `%LOCALAPPDATA%\Tangerine\tangerine.log` — 실패한 변환의 이유가 남습니다 |
+| 기록 폴더 열기 | `%LOCALAPPDATA%\Citrus\citrus.log` — 실패한 변환의 이유가 남습니다 |
 
 변환하는 동안 알림 영역 아이콘이 진행된 만큼 시계 방향으로 밝게 차오르고, 마우스를 올리면 `변환 중 37%` 처럼 보입니다.
 
-설정은 `%APPDATA%\Tangerine\settings.json` 에 저장됩니다.
+설정은 `%APPDATA%\Citrus\settings.json` 에 저장됩니다.
 
 ## 설치
 
-[Releases](../../releases) 에서 내려받습니다. 설명서는 `Tangerine-Guide-v*.pdf` (원본: [docs/guide.html](docs/guide.html)) 입니다.
+[Releases](../../releases) 에서 내려받습니다. 설명서는 `Citrus-Guide-v*.pdf` (원본: [docs/guide.html](docs/guide.html)) 입니다.
 
-- **설치 파일 `Tangerine-Setup-v*.exe` (추천)**: 내 계정(`%LOCALAPPDATA%\Programs\Tangerine`)에 설치해 관리자 권한이 필요 없습니다.
-  바탕화면 바로가기와 로그인 시 자동 실행은 설치할 때 고르고, 시작 메뉴에 탠저린·탠저린 설명서가 생깁니다. 제거는 Windows 설정 → 앱.
-- **묶음 `Tangerine-v*-win-x64.zip`**: 원하는 폴더에 풀고 `Tangerine.exe` 를 실행합니다. `tools\ffmpeg.exe` 는 영상·오디오 변환에 쓰므로 같이 두세요.
+- **설치 파일 `Citrus-Setup-v*.exe` (추천)**: 내 계정(`%LOCALAPPDATA%\Programs\Citrus`)에 설치해 관리자 권한이 필요 없습니다.
+  바탕화면 바로가기와 로그인 시 자동 실행은 설치할 때 고르고, 시작 메뉴에 시트러스·시트러스 설명서가 생깁니다. 제거는 Windows 설정 → 앱.
+- **묶음 `Citrus-v*-win-x64.zip`**: 원하는 폴더에 풀고 `Citrus.exe` 를 실행합니다. `tools\ffmpeg.exe` 는 영상·오디오 변환에 쓰므로 같이 두세요.
 - .NET 설치는 필요 없습니다. 서명하지 않은 프로그램이라 "Windows 의 PC 보호" 창이 뜰 수 있습니다.
   설치 파일 오른쪽 클릭 → **속성** → **차단 해제** 체크 후 실행하면 뜨지 않고, 이미 떴다면 **추가 정보 → 실행** 을 누르세요.
 - Windows 10 (2004 이상) / 11, 64비트
@@ -92,28 +92,28 @@
 ## 개발
 
 ```powershell
-dotnet test tests/Tangerine.Core.Tests     # 형식 목록·파일 이름·ffmpeg 인자 테스트 (맥에서도 실행됨)
-.\scripts\fetch-ffmpeg.ps1                  # src\Tangerine\tools\ffmpeg.exe 받기 (처음 한 번)
+dotnet test tests/Citrus.Core.Tests     # 형식 목록·파일 이름·ffmpeg 인자 테스트 (맥에서도 실행됨)
+.\scripts\fetch-ffmpeg.ps1                  # src\Citrus\tools\ffmpeg.exe 받기 (처음 한 번)
 .\scripts\fetch-hancom.ps1                  # 한글 보안 승인 모듈 받기 (처음 한 번, 없으면 HWP 변환 때 확인 창이 뜸)
-dotnet run --project src/Tangerine          # 실행
-.\scripts\install-local.ps1                 # 이 PC 에 설치: %LOCALAPPDATA%\Programs\Tangerine, 로그인 시 자동 실행, 바탕화면·시작 메뉴 바로가기
-.\scripts\build-guide.ps1                   # docs\guide.html → docs\tangerine-guide.pdf (Edge 필요)
+dotnet run --project src/Citrus          # 실행
+.\scripts\install-local.ps1                 # 이 PC 에 설치: %LOCALAPPDATA%\Programs\Citrus, 로그인 시 자동 실행, 바탕화면·시작 메뉴 바로가기
+.\scripts\build-guide.ps1                   # docs\guide.html → docs\citrus-guide.pdf (Edge 필요)
 ```
 
-- .NET 10 SDK 필요. 맥에서도 `dotnet build src/Tangerine/Tangerine.csproj` 로 컴파일까지는 확인할 수 있습니다 (실행은 Windows 에서만).
+- .NET 10 SDK 필요. 맥에서도 `dotnet build src/Citrus/Citrus.csproj` 로 컴파일까지는 확인할 수 있습니다 (실행은 Windows 에서만).
 - `main` 에 올리면 GitHub Actions 가 Windows 에서 테스트·빌드합니다.
-- `v1.0.0` 처럼 태그를 올리면 설치 파일(Inno Setup, `installer/Tangerine.iss`)·zip·설명서 PDF 를 Releases 에 올립니다.
+- `v1.0.0` 처럼 태그를 올리면 설치 파일(Inno Setup, `installer/Citrus.iss`)·zip·설명서 PDF 를 Releases 에 올립니다.
   Actions 에서 Release 를 손으로 돌리면 Releases 에 올리지 않고 만든 파일만 Artifacts 에 남겨 시험할 수 있습니다.
 
 ### 구조
 
 | 위치 | 내용 |
 |---|---|
-| `src/Tangerine.Core/` | Windows 와 무관한 규칙 — 형식 목록(`FormatCatalog`), 결과 파일 이름(`OutputPaths`), ffmpeg 인자(`FfmpegArguments`), 자막 변환(`SubtitleConverter`) |
-| `src/Tangerine/Interop/DragWatcher.cs` | 전역 저수준 마우스 훅. 왼쪽 버튼으로 끌어오는 중 Shift 가 눌리면 메뉴를 띄움 |
-| `src/Tangerine/Ui/RadialMenuWindow.*` | 귤 단면 모양 원형 메뉴 창 (Liquid Glass 풍 유리). 이 창이 드롭 대상이며, 항상 "복사" 로 답해 탐색기가 원본을 옮기지 않게 함 |
-| `src/Tangerine/Ui/TrayIcon.cs` | 알림 영역 아이콘·메뉴·알림 |
-| `src/Tangerine/Conversion/` | Magick.NET 이미지 변환, ffmpeg.exe 실행, 한글·Office 문서 → PDF (`DocumentConverter`), PDF → 그림 (`PdfPages`), PDF 합치기·나누기 (`PdfMerger`, `PdfSplitter`), 반디집 압축 (`Archiver`), 동시 변환 관리 |
+| `src/Citrus.Core/` | Windows 와 무관한 규칙 — 형식 목록(`FormatCatalog`), 결과 파일 이름(`OutputPaths`), ffmpeg 인자(`FfmpegArguments`), 자막 변환(`SubtitleConverter`) |
+| `src/Citrus/Interop/DragWatcher.cs` | 전역 저수준 마우스 훅. 왼쪽 버튼으로 끌어오는 중 Shift 가 눌리면 메뉴를 띄움 |
+| `src/Citrus/Ui/RadialMenuWindow.*` | 귤 단면 모양 원형 메뉴 창 (Liquid Glass 풍 유리). 이 창이 드롭 대상이며, 항상 "복사" 로 답해 탐색기가 원본을 옮기지 않게 함 |
+| `src/Citrus/Ui/TrayIcon.cs` | 알림 영역 아이콘·메뉴·알림 |
+| `src/Citrus/Conversion/` | Magick.NET 이미지 변환, ffmpeg.exe 실행, 한글·Office 문서 → PDF (`DocumentConverter`), PDF → 그림 (`PdfPages`), PDF 합치기·나누기 (`PdfMerger`, `PdfSplitter`), 반디집 압축 (`Archiver`), 동시 변환 관리 |
 
 ### 다음에 할 일
 

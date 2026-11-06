@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>탠저린 기능 안내</title>
+<title>시트러스 기능 안내</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* 레이아웃: 귤 조각 메뉴 그림이 있는 머리말, 그 아래 좁은 본문 칼럼에 표와 규칙을 차례로. 색은 탠저린 메뉴의 유리·열화상에서 가져옴 */
+/* 레이아웃: 귤 조각 메뉴 그림이 있는 머리말, 그 아래 좁은 본문 칼럼에 표와 규칙을 차례로. 색은 시트러스 메뉴의 유리·열화상에서 가져옴 */
 :root {
   --bg: #fbf8f4;
   --surface: #ffffff;
@@ -139,10 +139,10 @@ footer { font-size: .85rem; color: var(--muted); border-top: 1px solid var(--lin
 <div class="page">
   <header class="hero">
     <div>
-      <div class="eyebrow">TANGERINE FOR WINDOWS</div>
-      <h1>탠저린 기능 안내</h1>
+      <div class="eyebrow">CITRUS FOR WINDOWS</div>
+      <h1>시트러스 기능 안내</h1>
       <p class="lead">탐색기에서 파일을 끌어오는 도중 <kbd>Shift</kbd> 를 누르면 커서 아래에 귤 조각 메뉴가 뜹니다. 원하는 조각 위에 놓으면 원본 옆에 새 파일이 생깁니다.</p>
-      <div class="meta"><span>제작 dlaclan</span><span>버전 1.0.2</span><span>Windows 10 (2004 이상) · 11, 64비트</span><span>모든 변환은 이 PC 안에서만</span></div>
+      <div class="meta"><span>제작 dlaclan</span><span>버전 1.1.0</span><span>Windows 10 (2004 이상) · 11, 64비트</span><span>모든 변환은 이 PC 안에서만</span></div>
     </div>
     <svg class="wheel" viewBox="0 0 200 200" role="img" aria-label="오렌지 단면 그림: 껍질 안에 조각 열 개">
       <circle cx="100" cy="100" r="97" fill="#FF8A3D"/>
@@ -211,11 +211,11 @@ footer { font-size: .85rem; color: var(--muted); border-top: 1px solid var(--lin
           <tr><td>엑셀<br><span class="engine">XLS, XLSX</span></td><td>PDF, CSV (시트마다, UTF-8)</td><td class="engine">설치된 Excel</td></tr>
           <tr><td>CSV</td><td>XLSX</td><td class="engine">설치된 Excel</td></tr>
           <tr><td>발표<br><span class="engine">PPT, PPTX</span></td><td>PDF, JPG·PNG (장마다 300dpi)</td><td class="engine">설치된 PowerPoint</td></tr>
-          <tr><td>자막<br><span class="engine">SRT, VTT</span></td><td>SRT, VTT, TXT (대사만)</td><td class="engine">탠저린 자체</td></tr>
+          <tr><td>자막<br><span class="engine">SRT, VTT</span></td><td>SRT, VTT, TXT (대사만)</td><td class="engine">시트러스 자체</td></tr>
           <tr><td>PDF</td><td>나누기 (쪽마다 PDF), JPG·PNG (쪽마다 300dpi)</td><td class="engine">PDFsharp / Windows PDF 렌더러</td></tr>
           <tr><td>PDF 여러 개</td><td>합치기 (PDF 하나로)</td><td class="engine">PDFsharp</td></tr>
           <tr><td>무엇이든</td><td>ZIP (끌어온 것을 모두 묶어 하나로)</td><td class="engine">반디집, 없으면 Windows 기본 ZIP</td></tr>
-          <tr><td>무엇이든</td><td>경로 복사 (전체 경로를 한 줄에 하나씩 클립보드로)</td><td class="engine">탠저린 자체</td></tr>
+          <tr><td>무엇이든</td><td>경로 복사 (전체 경로를 한 줄에 하나씩 클립보드로)</td><td class="engine">시트러스 자체</td></tr>
         </tbody>
       </table>
     </div>
@@ -297,14 +297,14 @@ footer { font-size: .85rem; color: var(--muted); border-top: 1px solid var(--lin
       <div class="rule"><h3>알림</h3><ul>
         <li>끝나면 Windows 알림. 누르면 탐색기에서 결과 파일을 보여 줌</li>
         <li>실패하면 이유를 한국어로 알려 줌</li>
-        <li>기록: <span class="file">%LOCALAPPDATA%\Tangerine\tangerine.log</span></li>
+        <li>기록: <span class="file">%LOCALAPPDATA%\Citrus\citrus.log</span></li>
       </ul></div>
       <div class="rule"><h3>설치</h3><ul>
-        <li><span class="file">Tangerine-Setup-v1.0.2.exe</span> 를 실행하면 내 계정에 설치 (관리자 권한 필요 없음)</li>
-        <li>위치: <span class="file">%LOCALAPPDATA%\Programs\Tangerine</span></li>
+        <li><span class="file">Citrus-Setup-v1.1.0.exe</span> 를 실행하면 내 계정에 설치 (관리자 권한 필요 없음)</li>
+        <li>위치: <span class="file">%LOCALAPPDATA%\Programs\Citrus</span></li>
         <li>바탕화면 바로가기, Windows 시작 시 자동 실행은 설치할 때 고름</li>
-        <li>시작 메뉴에 <b>탠저린</b>, <b>탠저린 설명서</b></li>
-        <li>제거: Windows 설정 → 앱 → 설치된 앱 → Tangerine</li>
+        <li>시작 메뉴에 <b>시트러스</b>, <b>시트러스 설명서</b></li>
+        <li>제거: Windows 설정 → 앱 → 설치된 앱 → Citrus</li>
       </ul></div>
       <div class="rule"><h3>메뉴 모양</h3><ul>
         <li>귤 단면: 껍질 테두리 안에 형식마다 조각 하나</li>
@@ -329,7 +329,7 @@ footer { font-size: .85rem; color: var(--muted); border-top: 1px solid var(--lin
     <div class="rules">
       <div class="rule"><h3>제작</h3><ul>
         <li><b>dlaclan</b></li>
-        <li>저장소: <span class="file">github.com/dlaclan94-ux/tangerine-for-windows</span></li>
+        <li>저장소: <span class="file">github.com/dlaclan94-ux/citrus-for-windows</span></li>
       </ul></div>
       <div class="rule"><h3>참고한 앱</h3><ul>
         <li>macOS 용 <b>Tangerine</b> (Leap Studio, tangerineformac.com)</li>
@@ -338,7 +338,7 @@ footer { font-size: .85rem; color: var(--muted); border-top: 1px solid var(--lin
     </div>
   </section>
 
-  <footer>탠저린 for Windows 1.0.2 · 제작 dlaclan · 맥용 Tangerine(Leap Studio)을 참고해 만든 개인 프로젝트 · 사용한 오픈소스: ffmpeg(GPL), Magick.NET(Apache-2.0), PDFsharp(MIT)</footer>
+  <footer>시트러스 for Windows 1.1.0 · 제작 dlaclan · 맥용 Tangerine(Leap Studio)을 참고해 만든 개인 프로젝트 · 사용한 오픈소스: ffmpeg(GPL), Magick.NET(Apache-2.0), PDFsharp(MIT)</footer>
 </div>
 
 </body>
