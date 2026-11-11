@@ -35,6 +35,8 @@ public partial class App : Application
         }
 
         DispatcherUnhandledException += OnUnhandledException;
+        // 변환 스레드 등 화면 밖 스레드의 오류는 앱을 끝내므로 끝나기 전에 이유를 남긴다
+        AppDomain.CurrentDomain.UnhandledException += (_, args) => AppLog.Write($"처리하지 못한 오류로 종료: {args.ExceptionObject}");
         _settings = AppSettings.Load();
 
         _menu = new RadialMenuWindow();
@@ -55,7 +57,11 @@ public partial class App : Application
             if (_watcher is not null)
                 _watcher.ExplorerOnly = on;
         };
-        _tray.ExitRequested += () => Shutdown();
+        _tray.ExitRequested += () =>
+        {
+            AppLog.Write("알림 영역 메뉴에서 종료");
+            Shutdown();
+        };
         _tray.CancelRequested += _converter.CancelAll;
         // 진행률은 변환 스레드에서 오므로 화면 스레드로 넘겨 아이콘을 그린다
         _converter.ProgressChanged += progress => Dispatcher.BeginInvoke(() => _tray?.SetProgress(progress));
@@ -84,8 +90,16 @@ public partial class App : Application
         AppLog.Write("시작");
     }
 
+    protected override void OnSessionEnding(SessionEndingCancelEventArgs e)
+    {
+        AppLog.Write($"Windows {e.ReasonSessionEnding} 로 종료");
+        base.OnSessionEnding(e);
+    }
+
+    // 로그에 "시작" 다음 "종료" 가 없으면 작업 관리자·다른 프로그램이 강제로 끈 것이다
     protected override void OnExit(ExitEventArgs e)
     {
+        AppLog.Write($"종료 (코드 {e.ApplicationExitCode})");
         _watcher?.Dispose();
         _tray?.Dispose();
         _menu?.Close();
