@@ -1,15 +1,13 @@
 # Citrus for Windows — 끌어서 바로 바꾸는 파일 변환기
 
-맥용 파일 변환 앱 [Tangerine](https://tangerineformac.com)(Leap Studio)의 핵심 동작을 Windows 에서 쓰려고 만든 프로그램입니다.
-원본 앱과는 관계가 없는 개인 프로젝트입니다. 참고한 소개 글: [AI매터스 — Tangerine](https://aimatters.co.kr/ai-tool/56353/)
+탐색기에서 파일을 끌어오면서 `Shift` 를 누르면 원형 메뉴가 뜨고, 고른 형식으로 바로 바꿔 주는 Windows 용 개인 프로젝트입니다.
 
 > **English** — A drag-and-drop file converter for Windows. Start dragging files in File Explorer, press `Shift`,
 > and a radial "citrus slice" menu appears under the cursor; drop on a slice and the converted file is saved
 > next to the original. It handles images, video and audio (FFmpeg), Hangul/Word/Excel/PowerPoint → PDF,
 > PDF merge, split and PDF → JPG/PNG, Excel ↔ CSV, subtitles (SRT ↔ VTT), ZIP and copying file paths.
 > Everything runs locally; nothing is uploaded. Windows 10 (2004+) / 11, 64-bit.
-> A personal project by **dlaclan**, inspired by the drag-to-convert workflow of [Tangerine](https://tangerineformac.com)
-> for macOS (Leap Studio). It is not affiliated with Leap Studio or the original app.
+> A personal project by **dlaclan**.
 
 ## 사용 방법
 
@@ -87,7 +85,7 @@
 - Windows 10 (2004 이상) / 11, 64비트
 - 관리자 권한으로 실행한 프로그램에서 끌어 온 파일은 Windows 보안 정책 때문에 받을 수 없습니다.
 
-제작: **dlaclan**. 맥용 [Tangerine](https://tangerineformac.com)(Leap Studio)의 끌어서 바꾸는 방식을 참고해 Windows 용으로 새로 만든 개인 프로젝트이며, 원본 앱과는 관계가 없습니다.
+제작: **dlaclan**. 개인 프로젝트입니다.
 
 ## 개발
 
@@ -117,7 +115,7 @@ dotnet run --project src/Citrus          # 실행
 
 ### 다음에 할 일
 
-원본 Tangerine 에 있는 아래 기능은 아직 없습니다.
+아래 기능은 아직 없습니다.
 
 - `Ctrl` + 끌기: 파일 도구 — 압축(비율·목표 용량), 자르기, 영상 자르기·나누기, PDF 쪽 골라 빼기, 메타데이터 삭제, QR 읽기
 - `Alt` + 끌기: 파일 동작 — 복사, 이동, 경로 복사, 터미널 열기

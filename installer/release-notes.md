@@ -15,5 +15,4 @@
 ## 만든 사람
 
 - 제작: **dlaclan**
-- macOS 용 [Tangerine](https://tangerineformac.com) (Leap Studio) 의 끌어서 바꾸는 방식을 참고해 Windows 용으로 새로 만든 개인 프로젝트입니다. 원본 앱·Leap Studio 와는 관계가 없습니다.
 - 사용한 오픈소스: ffmpeg (GPL, `tools\FFMPEG-LICENSE.txt`), Magick.NET (Apache-2.0), PDFsharp (MIT)
