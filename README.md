@@ -122,7 +122,9 @@ dotnet run --project src/Citrus          # 실행
 - 한글·Office 가 없는 PC 를 위한 문서 변환 (LibreOffice 등), EPUB
 - 탐색기 오른쪽 클릭 "변환" 메뉴
 
-## 라이선스 참고
+## 라이선스
+
+이 저장소의 코드는 [MIT](LICENSE) 라이선스입니다. 함께 쓰는 외부 구성 요소는 아래처럼 각자의 라이선스를 따릅니다.
 
 - 배포 zip 의 `tools\ffmpeg.exe` 는 [BtbN/FFmpeg-Builds](https://github.com/BtbN/FFmpeg-Builds) 의 GPL 빌드이며 라이선스는 `tools\FFMPEG-LICENSE.txt` 에 있습니다.
 - 한글 보안 승인 모듈 `hancom\FilePathCheckerModuleExample.dll` 은 한컴이 공개한 예제([hancom-io/devcenter-archive](https://github.com/hancom-io/devcenter-archive))로, 저장소에 넣지 않고 빌드할 때 받습니다.
